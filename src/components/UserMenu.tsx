@@ -121,8 +121,8 @@ export function UserMenu({ isOpen, onClose }: { isOpen: boolean, onClose: () => 
     <>
 
       {isOpen && (
-        <div className="fixed inset-0 z-[9999] flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-in fade-in transition-all" onClick={onClose}>
-          <div onClick={(e) => e.stopPropagation()} className="w-full max-w-sm bg-[var(--bg-color)] shadow-xl rounded-3xl md:rounded-[2rem] border border-[var(--border-color)] flex flex-col max-h-[85vh] overflow-hidden animate-in zoom-in-95 duration-200">
+        <div className="fixed inset-0 z-[9999] flex items-center lg:items-stretch justify-center lg:justify-end p-4 lg:p-0 bg-black/60 backdrop-blur-sm animate-in fade-in transition-all" onClick={onClose}>
+          <div onClick={(e) => e.stopPropagation()} className="w-full max-w-sm bg-[var(--bg-color)] shadow-xl rounded-3xl md:rounded-[2rem] lg:rounded-none lg:rounded-l-[2rem] border border-[var(--border-color)] lg:border-y-0 lg:border-r-0 flex flex-col max-h-[85vh] lg:max-h-none lg:h-full overflow-hidden animate-in zoom-in-95 lg:zoom-in-100 lg:slide-in-from-right duration-200">
             
             <div className="flex p-6 flex-col gap-8 flex-grow overflow-y-auto">
               {/* Header inside scroll is fine, or sticky */}

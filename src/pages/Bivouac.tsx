@@ -246,7 +246,7 @@ export default function Bivouac() {
         {(activeLogId || showDrawer) && (
           <div className="w-full lg:w-1/3 flex flex-col gap-6 lg:static z-40 bg-[var(--bg-color)] lg:bg-transparent p-0 lg:p-0">
             
-            {showDrawer && (
+            {activeLogId && (
               <div className="bg-[var(--surface-color)] border border-[var(--border-color)] rounded-[2rem] shadow-xl flex flex-col mx-0 max-h-[80vh] overflow-y-auto">
                 {/* Image header if available */}
                 {logs.find(l => l.id === activeLogId)?.image_url ? (
