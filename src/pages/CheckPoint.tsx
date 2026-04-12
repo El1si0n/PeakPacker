@@ -181,7 +181,9 @@ export default function CheckPoint() {
   const { confirm, toast } = useUI();
   const [tasks, setTasks] = useState<Task[]>([]);
   const [bags, setBags] = useState<any[]>([]);
-  const [activeBagName, setActiveBagName] = useState<string | null>(null);
+  const [activeBagName, setActiveBagName] = useState<string | null>(() => {
+    return localStorage.getItem('peakpacker_active_bag_name');
+  });
 
   useEffect(() => {
     if (user) {
@@ -259,6 +261,7 @@ export default function CheckPoint() {
     if (!selectedBag) return;
 
     setActiveBagName(selectedBag.name);
+    localStorage.setItem('peakpacker_active_bag_name', selectedBag.name);
 
     // Vider la catégorie "Équipement" avant d'importer la nouvelle config
     const eqTasksToDelete = tasks.filter(t => t.category === "Équipement");
@@ -297,6 +300,7 @@ export default function CheckPoint() {
       onConfirm: async () => {
         setTasks([]);
         setActiveBagName(null);
+        localStorage.removeItem('peakpacker_active_bag_name');
         if (user) await supabase.from('tasks').delete().eq('user_id', user.id);
         toast({ message: "Liste vidée avec succès." });
       }
@@ -413,7 +417,7 @@ export default function CheckPoint() {
             const allCompleted = categoryTasks.length > 0 && completedCount === categoryTasks.length;
 
             return (
-              <div key={category.id} className="bg-[var(--surface-color)] border border-[var(--border-color)] rounded-3xl shadow-sm flex flex-col print:bg-white print:border-none print:shadow-none print:rounded-none print:mb-8" style={{ pageBreakInside: 'avoid' }}>
+              <div key={category.id} className="bg-[var(--surface-color)] border border-[var(--border-color)] rounded-3xl shadow-sm flex flex-col print:bg-white print:border-none print:shadow-none print:rounded-none print:mb-8">
                 {/* Category Header */}
                 <div className={`px-4 sm:px-5 py-4 border-b border-[var(--border-color)] flex items-center justify-between gap-2 transition-colors print:px-0 print:border-black print:border-b-2 print:pb-2 print:mb-2 ${allCompleted ? 'bg-[var(--bg-color)]/50 print:bg-transparent' : ''}`}>
                   <div className="flex items-center gap-2 sm:gap-3 flex-shrink-0">

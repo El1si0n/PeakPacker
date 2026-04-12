@@ -42,5 +42,6 @@ export const BRANDS_DIRECTORY = [
   {"url": "https://www.lasportiva.com/fr", "name": "La Sportiva", "domain": "lasportiva.com"},
   {"url": "https://primusequipment.com/en-eu", "name": "Primus", "domain": "primusequipment.com"},
   {"url": "https://eu-main.iniushop.com/fr", "name": "INIU", "domain": "iniushop.com"},
-  {"url": "https://www.dji.com/fr", "name": "DJI", "domain": "dji.com"}
+  {"url": "https://www.dji.com/fr", "name": "DJI", "domain": "dji.com"},
+  {"url": "https://www.lyophilise.fr/", "name": "Lyophilisé.fr", "domain": "lyophilise.fr"}
 ].sort((a, b) => a.name.localeCompare(b.name));

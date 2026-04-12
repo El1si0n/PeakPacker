@@ -10,10 +10,10 @@ export function BrandBadge({ brandName }: { brandName?: string }) {
   const brandData = BRANDS_DIRECTORY.find(b => b.name.toLowerCase() === brandName.toLowerCase());
 
   if (!brandData || error) {
-    // S'il n'y a pas de logo ou erreur de chargement, on affiche juste le texte en haut en petit format orange
+    // S'il n'y a pas de logo ou erreur de chargement, on affiche un tag au même format neutre que les logos
     return (
-      <div className="absolute bottom-3 left-3 bg-[var(--surface-color)]/90 backdrop-blur-md px-3 py-1 rounded-[10px] shadow-sm border border-[var(--color-primary)]/20 z-10 hidden sm:block">
-         <span className="text-[9px] font-black uppercase tracking-widest text-[var(--color-primary)] opacity-80">{brandName}</span>
+      <div className="absolute bottom-3 left-3 bg-white px-2.5 h-8 flex items-center justify-center rounded-lg shadow-sm border border-[var(--border-color)] overflow-hidden z-10 transition-transform duration-300 hover:scale-105">
+         <span className="text-[10px] font-black uppercase tracking-wider text-black truncate max-w-[120px]">{brandName}</span>
       </div>
     );
   }

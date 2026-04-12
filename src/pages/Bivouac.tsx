@@ -229,8 +229,11 @@ export default function Bivouac() {
         </div>
         <button 
           onClick={() => {
+            setActiveLogId(null);
+            setEditingLogId(null);
             setDraftLocation(null);
             setGpsInput("");
+            setFormData({ title: "", date: new Date().toISOString().split('T')[0], rating: 5, companions: "", description: "", image_url: "", weather: "Sun" });
             setShowDrawer(true);
           }}
           className="flex flex-shrink-0 items-center justify-center gap-2 bg-[var(--color-primary)] text-white px-6 py-3.5 rounded-full font-bold hover:opacity-90 active:scale-95 transition-all shadow-lg shadow-[var(--color-primary)]/20 whitespace-nowrap"
