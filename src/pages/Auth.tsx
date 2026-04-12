@@ -9,6 +9,23 @@ export default function Auth() {
   const [isSignUp, setIsSignUp] = useState(false);
   const [message, setMessage] = useState<{ type: 'error' | 'success', text: string } | null>(null);
 
+  const handleResetPassword = async () => {
+    if (!email) {
+      setMessage({ type: 'error', text: 'Veuillez entrer votre adresse email.' });
+      return;
+    }
+    setLoading(true);
+    const { error } = await supabase.auth.resetPasswordForEmail(email, {
+      redirectTo: window.location.origin,
+    });
+    setLoading(false);
+    if (error) {
+      setMessage({ type: 'error', text: error.message });
+    } else {
+      setMessage({ type: 'success', text: 'Lien de réinitialisation envoyé par email !' });
+    }
+  };
+
   const handleAuth = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
@@ -78,7 +95,18 @@ export default function Auth() {
           </div>
 
           <div className="flex flex-col gap-1.5">
-            <label className="text-sm font-semibold text-[var(--text-color)] px-1">Mot de passe</label>
+            <div className="flex items-end justify-between px-1">
+              <label className="text-sm font-semibold text-[var(--text-color)]">Mot de passe</label>
+              {!isSignUp && (
+                <button 
+                  type="button" 
+                  onClick={handleResetPassword} 
+                  className="text-xs font-medium text-[var(--color-primary)] hover:brightness-110 transition-all"
+                >
+                  Oublié ?
+                </button>
+              )}
+            </div>
             <input
               type="password"
               value={password}
