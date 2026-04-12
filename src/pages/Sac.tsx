@@ -188,8 +188,8 @@ export default function Sac() {
     return (
       <div className="pt-8 pb-32 md:pt-28 md:pb-16 px-4 max-w-7xl mx-auto min-h-screen flex flex-col">
         {/* HEADER */}
-        <div className="mb-10 text-center md:text-left flex flex-col items-center md:items-start">
-          <div className="flex items-center justify-center md:justify-start gap-3 mb-3">
+        <div className="mb-10 flex flex-col items-start gap-1">
+          <div className="flex items-center gap-3 mb-2">
             <Backpack className="text-[var(--color-primary)] w-10 h-10 flex-shrink-0" />
             <h1 className="text-4xl md:text-5xl font-bold tracking-tight text-[var(--text-color)]">
               Configurations

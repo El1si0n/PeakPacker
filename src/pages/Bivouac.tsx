@@ -213,17 +213,17 @@ export default function Bivouac() {
   };
 
   return (
-    <div className="pt-16 pb-24 md:pt-28 md:pb-16 px-4 max-w-7xl mx-auto flex flex-col min-h-screen">
+    <div className="pt-16 pb-48 md:pt-28 md:pb-16 px-4 max-w-7xl mx-auto flex flex-col min-h-screen">
       {/* HEADER */}
-      <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-8 flex-shrink-0 text-center md:text-left">
-        <div className="flex flex-col items-center md:items-start">
-          <div className="flex items-center justify-center md:justify-start gap-3 mb-3 pt-1">
+      <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-8 flex-shrink-0">
+        <div className="flex flex-col items-start">
+          <div className="flex items-center gap-3 mb-3 pt-1">
             <Map className="text-[var(--color-primary)] w-10 h-10 flex-shrink-0" />
             <h1 className="text-4xl md:text-5xl font-bold tracking-tight text-[var(--text-color)] pb-1">
               Carnet de Bivouac
             </h1>
           </div>
-          <p className="text-[var(--text-muted)] text-lg flex items-center justify-center md:justify-start gap-2">
+          <p className="text-[var(--text-muted)] text-lg flex items-center gap-2">
             Tracez, documentez et revivez vos expéditions.
           </p>
         </div>
@@ -332,7 +332,7 @@ export default function Bivouac() {
             )}
 
              {showDrawer && !activeLogId && (
-              <div className="bg-[var(--surface-color)] border border-[var(--border-color)] p-6 rounded-3xl md:rounded-[2rem] shadow-xl flex flex-col mx-0 max-h-[85vh] overflow-y-auto">
+              <div className="bg-[var(--surface-color)] border border-[var(--border-color)] p-6 rounded-3xl md:rounded-[2rem] shadow-xl flex flex-col mx-0">
                 <div className="flex items-center justify-between mb-6 pb-4 border-b border-[var(--border-color)] flex-shrink-0">
                   <h2 className="text-xl font-bold flex items-center gap-2">
                     <Tent className="text-[var(--color-primary)]" />

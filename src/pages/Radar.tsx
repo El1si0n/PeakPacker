@@ -264,16 +264,16 @@ export default function Radar() {
     <div className="pt-6 pb-24 md:pt-28 md:pb-16 px-4 max-w-7xl mx-auto flex flex-col min-h-screen">
       
       {/* HEADER & HERO */}
-      <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-10 flex-shrink-0">
-        <div>
-          <div className="flex items-center gap-3 mb-3 pt-1">
+      <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-8 mt-2">
+        <div className="flex flex-col items-start">
+          <div className="flex items-center gap-3 mb-2">
             <RadarIcon className="text-[var(--color-primary)] w-10 h-10 flex-shrink-0" />
-            <h1 className="text-4xl md:text-5xl font-bold tracking-tight text-[var(--text-color)] pb-1">
+            <h1 className="text-4xl md:text-5xl font-bold tracking-tight text-[var(--text-color)]">
               Radar
             </h1>
           </div>
-          <p className="text-[var(--text-muted)] text-lg flex items-center gap-2 max-w-xl pr-4">
-            Ta wishlist. Repère et planifie tes prochains achats.
+          <p className="text-[var(--text-muted)] text-lg">
+            Repérez, comparez et planifiez vos prochains investissements.
           </p>
         </div>
         
