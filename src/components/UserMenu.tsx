@@ -121,21 +121,21 @@ export function UserMenu({ isOpen, onClose }: { isOpen: boolean, onClose: () => 
     <>
 
       {isOpen && (
-        <div className="fixed inset-0 z-[9999] flex justify-end bg-[var(--bg-color)] lg:bg-black/60 backdrop-blur-sm animate-in fade-in transition-all" onClick={onClose}>
-          <div onClick={(e) => e.stopPropagation()} className="w-full lg:max-w-sm h-full bg-[var(--bg-color)] shadow-2xl flex flex-col animate-in slide-in-from-right duration-300 border-l border-[var(--border-color)]">
+        <div className="fixed inset-0 z-[9999] flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-in fade-in transition-all" onClick={onClose}>
+          <div onClick={(e) => e.stopPropagation()} className="w-full max-w-sm bg-[var(--bg-color)] shadow-xl rounded-3xl md:rounded-[2rem] border border-[var(--border-color)] flex flex-col max-h-[85vh] overflow-hidden animate-in zoom-in-95 duration-200">
             
-            <div className="flex items-center justify-between p-6 border-b border-[var(--border-color)]">
-              <h2 className="text-xl font-bold flex items-center gap-2">
-                <Settings className="text-[var(--color-primary)]" />
-                Mon Espace
-              </h2>
-              <button onClick={onClose} className="p-2 text-[var(--text-muted)] hover:bg-[var(--surface-color)] rounded-full transition-colors">
-                <X size={20} />
-              </button>
-            </div>
+            <div className="flex p-6 flex-col gap-8 flex-grow overflow-y-auto">
+              {/* Header inside scroll is fine, or sticky */}
+              <div className="flex items-center justify-between border-b border-[var(--border-color)] pb-4 shrink-0">
+                <h2 className="text-xl font-bold flex items-center gap-2">
+                  <Settings className="text-[var(--color-primary)]" />
+                  Mon Espace
+                </h2>
+                <button onClick={onClose} className="p-2 text-[var(--text-muted)] hover:bg-[var(--surface-color)] rounded-full transition-colors">
+                  <X size={20} />
+                </button>
+              </div>
 
-            <div className="flex-grow overflow-y-auto p-6 flex flex-col gap-8">
-              
               {/* Dashboard */}
               <div className="flex flex-col gap-3">
                 <h3 className="text-xs font-bold uppercase tracking-wider text-[var(--text-muted)]">Tableau de bord</h3>
@@ -240,9 +240,7 @@ export function UserMenu({ isOpen, onClose }: { isOpen: boolean, onClose: () => 
                 </div>
               </div>
 
-            </div>
-
-            <div className="p-4 border-t border-[var(--border-color)] flex flex-col gap-3">
+            <div className="pt-4 border-t border-[var(--border-color)] flex flex-col gap-3 shrink-0">
               <button 
                 onClick={signOut}
                 className="w-full flex items-center justify-center gap-2 bg-red-500/10 text-red-500 hover:bg-red-500/20 font-bold py-3 rounded-2xl transition-all"
@@ -253,12 +251,13 @@ export function UserMenu({ isOpen, onClose }: { isOpen: boolean, onClose: () => 
               
               <button 
                 onClick={handleDeleteAccount}
-                className="text-xs font-medium text-[var(--text-muted)] hover:text-red-500 transition-colors mx-auto"
+                className="text-xs text-[var(--text-muted)] hover:underline hover:text-red-500 text-center opacity-70"
               >
                 Supprimer mon compte
               </button>
             </div>
-            
+
+            </div>
           </div>
         </div>
       )}

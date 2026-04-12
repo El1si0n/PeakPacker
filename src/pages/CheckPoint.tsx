@@ -345,7 +345,7 @@ export default function CheckPoint() {
   };
 
   return (
-    <div className="pt-8 pb-32 md:pt-28 md:pb-16 px-4 max-w-7xl mx-auto min-h-screen flex flex-col print:bg-white print:text-black print:p-0 print:m-0 print:min-h-0">
+    <div className="pt-16 pb-24 md:pt-28 md:pb-16 px-4 max-w-7xl mx-auto min-h-screen flex flex-col print:bg-white print:text-black print:p-0 print:m-0 print:min-h-0">
       
       <style>{`
         @media print {
@@ -373,9 +373,9 @@ export default function CheckPoint() {
         </div>
       </div>
       {/* HEADER ECRAN */}
-      <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-7 md:mb-10 print:hidden">
-        <div>
-          <div className="flex items-center gap-3 mb-3">
+      <div className="flex flex-col md:flex-row items-center md:items-end justify-between gap-6 mb-10 text-center md:text-left print:hidden">
+        <div className="flex flex-col items-center md:items-start">
+          <div className="flex items-center justify-center md:justify-start gap-3 mb-3">
             <CheckSquare className="text-[var(--color-primary)] w-10 h-10 flex-shrink-0" />
             <h1 className="text-4xl md:text-5xl font-bold tracking-tight text-[var(--text-color)]">
               Check-list

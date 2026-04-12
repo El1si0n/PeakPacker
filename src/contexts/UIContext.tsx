@@ -92,7 +92,7 @@ export function UIProvider({ children }: { children: ReactNode }) {
           return (
             <div 
               key={t.id} 
-              className={`flex items-start gap-3.5 px-5 py-4 rounded-2xl shadow-2xl shadow-black/20 border animate-in slide-in-from-bottom-5 fade-in zoom-in-95 duration-300 pointer-events-auto max-w-sm w-full
+              className={`flex items-start gap-3.5 px-5 py-4 rounded-2xl shadow-2xl shadow-black/20 border animate-in slide-in-from-bottom-5 fade-in zoom-in-95 duration-300 pointer-events-auto max-w-sm w-full mx-auto
                 ${isError ? 'bg-red-500/95 backdrop-blur-xl border-red-600/50 text-white' : 'bg-[#1a1a1a]/95 backdrop-blur-xl border-white/10 text-white'}`}
             >
               {isError ? (
