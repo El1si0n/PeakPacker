@@ -71,9 +71,9 @@ export function ItemModal({ isOpen, onClose, onSave, initialData }: ItemModalPro
 
   return (
     <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/40 backdrop-blur-sm animate-in fade-in">
-      <div className="bg-[var(--surface-color)] rounded-3xl w-full max-w-lg shadow-2xl border border-[var(--border-color)] overflow-y-auto max-h-[85vh]">
-        <div className="p-6 flex flex-col gap-6">
-          <div className="flex justify-between items-center pb-2 border-b border-[var(--border-color)]">
+      <div className="bg-[var(--surface-color)] rounded-3xl w-full max-w-lg shadow-2xl border border-[var(--border-color)] flex flex-col max-h-[80vh] overflow-hidden">
+        <div className="p-6 flex flex-col gap-6 overflow-y-auto">
+          <div className="flex justify-between items-center pb-2 border-b border-[var(--border-color)] shrink-0">
             <h2 className="text-xl font-bold text-[var(--text-color)]">
               {initialData ? 'Modifier le matériel' : 'Ajouter du matériel'}
             </h2>
@@ -199,7 +199,7 @@ export function ItemModal({ isOpen, onClose, onSave, initialData }: ItemModalPro
               />
             </div>
 
-            <div className="pt-4 mt-2 border-t border-[var(--border-color)]">
+            <div className="pt-4 mt-2 pb-4 border-t border-[var(--border-color)] shrink-0">
               <button 
                 type="submit"
                 disabled={loading}
