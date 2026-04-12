@@ -213,7 +213,7 @@ export default function Bivouac() {
   };
 
   return (
-    <div className="pt-16 pb-48 md:pt-28 md:pb-16 px-4 max-w-7xl mx-auto flex flex-col min-h-screen">
+    <div className="pt-8 pb-48 md:pt-28 md:pb-16 px-4 max-w-7xl mx-auto flex flex-col min-h-screen">
       {/* HEADER */}
       <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-8 flex-shrink-0">
         <div className="flex flex-col items-start">

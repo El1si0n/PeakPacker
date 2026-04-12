@@ -236,7 +236,7 @@ export default function Inventaire() {
 
   return (
     <div className="pt-8 pb-32 md:pt-28 md:pb-16 px-4 max-w-7xl mx-auto min-h-screen flex flex-col">
-      <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-8 mt-2">
+      <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-8">
         <div className="flex flex-col items-start">
           <div className="flex items-center gap-3 mb-2">
             <Box className="text-[var(--color-primary)] w-10 h-10 flex-shrink-0" />

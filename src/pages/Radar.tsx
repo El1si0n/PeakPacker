@@ -261,10 +261,10 @@ export default function Radar() {
   const totalPrice = items.reduce((sum, item) => sum + (item.price || 0), 0);
 
   return (
-    <div className="pt-6 pb-24 md:pt-28 md:pb-16 px-4 max-w-7xl mx-auto flex flex-col min-h-screen">
+    <div className="pt-8 pb-32 md:pt-28 md:pb-16 px-4 max-w-7xl mx-auto flex flex-col min-h-screen">
       
       {/* HEADER & HERO */}
-      <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-8 mt-2">
+      <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-8">
         <div className="flex flex-col items-start">
           <div className="flex items-center gap-3 mb-2">
             <RadarIcon className="text-[var(--color-primary)] w-10 h-10 flex-shrink-0" />

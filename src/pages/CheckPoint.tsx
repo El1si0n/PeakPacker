@@ -345,7 +345,7 @@ export default function CheckPoint() {
   };
 
   return (
-    <div className="pt-16 pb-24 md:pt-28 md:pb-16 px-4 max-w-7xl mx-auto min-h-screen flex flex-col print:bg-white print:text-black print:p-0 print:m-0 print:min-h-0">
+    <div className="pt-8 pb-32 md:pt-28 md:pb-16 px-4 max-w-7xl mx-auto min-h-screen flex flex-col print:bg-white print:text-black print:p-0 print:m-0 print:min-h-0">
       
       <style>{`
         @media print {
