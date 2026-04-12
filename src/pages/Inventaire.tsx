@@ -114,18 +114,34 @@ export default function Inventaire() {
 
   const handleExport = () => {
     if (items.length === 0) return;
-    const exportData = items.map((item: any) => { 
-       const { id, created_at, user_id, ...rest } = item; 
-       return rest; 
-    });
-    const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(exportData, null, 2));
+    
+    const headers = ['name', 'category', 'brand', 'weight', 'price', 'quantity', 'url', 'image_url', 'notes'];
+    
+    const csvContent = [
+      headers.join(','),
+      ...items.map(item => headers.map(header => {
+        let val = (item as any)[header] ?? '';
+        if (typeof val === 'string') {
+          val = val.replace(/"/g, '""');
+          if (val.includes(',') || val.includes('\n') || val.includes('"') || val.includes(';')) {
+            return `"${val}"`;
+          }
+        }
+        return val;
+      }).join(','))
+    ].join('\n');
+    
+    // Ajout du BOM pour qu'Excel lise correctement l'UTF-8 en Europe
+    const bom = new Uint8Array([0xEF, 0xBB, 0xBF]);
+    const blob = new Blob([bom, csvContent], { type: 'text/csv;charset=utf-8;' });
+    
     const downloadAnchorNode = document.createElement('a');
-    downloadAnchorNode.setAttribute("href", dataStr);
-    downloadAnchorNode.setAttribute("download", "peakpacker_inventory.json");
+    downloadAnchorNode.href = URL.createObjectURL(blob);
+    downloadAnchorNode.download = "peakpacker_inventaire.csv";
     document.body.appendChild(downloadAnchorNode);
     downloadAnchorNode.click();
     downloadAnchorNode.remove();
-    toast({ message: "Inventaire exporté avec succès !" });
+    toast({ message: "Inventaire exporté en CSV avec succès !" });
   };
 
   const handleImport = async (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -135,23 +151,69 @@ export default function Inventaire() {
     const reader = new FileReader();
     reader.onload = async (e) => {
       try {
-        const json = JSON.parse(e.target?.result as string);
-        if (Array.isArray(json) && json.length > 0) {
-          const insertData = json.map(item => ({
-             ...item,
-             user_id: user.id
-          }));
+        const text = e.target?.result as string;
+        
+        // Parse simple du CSV (y compris avec point-virgule d'Excel)
+        const rows = text.split(/\r?\n/).filter(row => row.trim().length > 0);
+        if (rows.length < 2) throw new Error("Fichier vide ou sans données.");
+        
+        let headers = rows[0].split(',').map(h => h.trim().replace(/^"|"$/g, ''));
+        const separator = (headers.length === 1 && rows[0].includes(';')) ? ';' : ',';
+        if (separator === ';') {
+          headers = rows[0].split(';').map(h => h.trim().replace(/^"|"$/g, ''));
+        }
+        
+        const insertData = [];
+        
+        for (let i = 1; i < rows.length; i++) {
+          const r = rows[i];
+          const cols: string[] = [];
+          let current = '';
+          let inQuotes = false;
+          for (let j = 0; j < r.length; j++) {
+            const char = r[j];
+            if (char === '"' && r[j+1] === '"') {
+              current += '"'; j++;
+            } else if (char === '"') {
+              inQuotes = !inQuotes;
+            } else if (char === separator && !inQuotes) {
+              cols.push(current);
+              current = '';
+            } else {
+              current += char;
+            }
+          }
+          cols.push(current);
+          
+          const item: any = { user_id: user.id };
+          headers.forEach((h, idx) => {
+              let val = cols[idx];
+              if (val !== undefined) {
+                 val = val.trim().replace(/^"|"$/g, '');
+                 if (['weight', 'price', 'quantity'].includes(h)) {
+                    const parsed = parseFloat(val.replace(',', '.')); // gère les inputs fr , => .
+                    item[h] = isNaN(parsed) ? (h==='quantity'?1:0) : parsed;
+                 } else {
+                    item[h] = val;
+                 }
+              }
+          });
+          
+          if (item.name) insertData.push(item);
+        }
+        
+        if (insertData.length > 0) {
           const { error } = await supabase.from('inventory').insert(insertData);
           if (error) throw error;
           
-          toast({ message: `${json.length} objets importés avec succès !` });
+          toast({ message: `${insertData.length} objets importés avec succès !` });
           fetchItems();
         } else {
           toast({ message: "Le fichier ne contient aucun équipement valide.", type: "error" });
         }
       } catch (err) {
         console.error(err);
-        toast({ message: "Erreur de lecture du fichier JSON.", type: "error" });
+        toast({ message: "Erreur de lecture du fichier CSV.", type: "error" });
       }
       
       // Reset input
@@ -229,14 +291,14 @@ export default function Inventaire() {
           </button>
           
           {/* Import/Export */}
-          <div className="hidden md:flex gap-2 ml-1">
-             <button onClick={() => fileInputRef.current?.click()} className="flex items-center justify-center w-12 h-12 bg-[var(--surface-color)] border border-[var(--border-color)] rounded-full text-[var(--text-muted)] hover:text-[var(--text-color)] hover:border-[var(--color-primary)] transition-all" title="Importer (JSON)">
+           <div className="hidden md:flex gap-2 ml-1">
+             <button onClick={() => fileInputRef.current?.click()} className="flex items-center justify-center w-12 h-12 bg-[var(--surface-color)] border border-[var(--border-color)] rounded-full text-[var(--text-muted)] hover:text-[var(--text-color)] hover:border-[var(--color-primary)] transition-all" title="Importer (CSV)">
                <Upload size={20} />
              </button>
-             <button onClick={handleExport} className="flex items-center justify-center w-12 h-12 bg-[var(--surface-color)] border border-[var(--border-color)] rounded-full text-[var(--text-muted)] hover:text-[var(--text-color)] hover:border-[var(--color-primary)] transition-all" title="Exporter (JSON)">
+             <button onClick={handleExport} className="flex items-center justify-center w-12 h-12 bg-[var(--surface-color)] border border-[var(--border-color)] rounded-full text-[var(--text-muted)] hover:text-[var(--text-color)] hover:border-[var(--color-primary)] transition-all" title="Exporter (CSV)">
                <Download size={20} />
              </button>
-             <input type="file" ref={fileInputRef} accept=".json" className="hidden" onChange={handleImport} />
+             <input type="file" ref={fileInputRef} accept=".csv" className="hidden" onChange={handleImport} />
           </div>
         </div>
 
