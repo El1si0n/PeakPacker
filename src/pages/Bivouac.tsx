@@ -258,10 +258,10 @@ export default function Bivouac() {
                       </h2>
                     </div>
                     <div className="absolute top-4 right-4 flex items-center gap-1 z-10 transition-all bg-black/40 p-1.5 rounded-full backdrop-blur-md">
-                      <button onClick={() => editLog(activeLogId)} className="hover:bg-white/20 text-white flex items-center justify-center rounded-full transition-all h-9 w-9" title="Modifier">
+                      <button onClick={() => activeLogId && editLog(activeLogId)} className="hover:bg-white/20 text-white flex items-center justify-center rounded-full transition-all h-9 w-9" title="Modifier">
                         <Pencil size={18} />
                       </button>
-                      <button onClick={() => deleteLog(activeLogId)} className="hover:bg-red-500/80 text-white flex items-center justify-center rounded-full transition-all h-9 w-9" title="Supprimer">
+                      <button onClick={() => activeLogId && deleteLog(activeLogId)} className="hover:bg-red-500/80 text-white flex items-center justify-center rounded-full transition-all h-9 w-9" title="Supprimer">
                         <Trash2 size={18} />
                       </button>
                       <div className="w-px h-5 bg-white/30 mx-1"></div>
@@ -276,10 +276,10 @@ export default function Bivouac() {
                       {logs.find(l => l.id === activeLogId)?.title}
                     </h2>
                     <div className="flex items-center gap-1 flex-shrink-0">
-                      <button onClick={() => editLog(activeLogId)} className="text-[var(--text-muted)] hover:text-[var(--color-primary)] transition-all h-9 w-9 rounded-full hover:bg-[var(--surface-color)] flex items-center justify-center" title="Modifier">
+                      <button onClick={() => activeLogId && editLog(activeLogId)} className="text-[var(--text-muted)] hover:text-[var(--color-primary)] transition-all h-9 w-9 rounded-full hover:bg-[var(--surface-color)] flex items-center justify-center" title="Modifier">
                         <Pencil size={18} />
                       </button>
-                      <button onClick={() => deleteLog(activeLogId)} className="text-[var(--text-muted)] hover:text-red-500 transition-all h-9 w-9 rounded-full hover:bg-red-500/10 flex items-center justify-center" title="Supprimer">
+                      <button onClick={() => activeLogId && deleteLog(activeLogId)} className="text-[var(--text-muted)] hover:text-red-500 transition-all h-9 w-9 rounded-full hover:bg-red-500/10 flex items-center justify-center" title="Supprimer">
                         <Trash2 size={18} />
                       </button>
                       <button onClick={() => setActiveLogId(null)} className="text-[var(--text-color)] hover:bg-[var(--border-color)] bg-[var(--border-color)]/50 transition-all h-9 w-9 rounded-full flex items-center justify-center ml-1">
