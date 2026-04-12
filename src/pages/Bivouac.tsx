@@ -332,7 +332,7 @@ export default function Bivouac() {
             )}
 
              {showDrawer && !activeLogId && (
-              <div className="bg-[var(--surface-color)] border border-[var(--border-color)] p-6 rounded-3xl shadow-xl flex flex-col mx-0">
+              <div className="bg-[var(--surface-color)] border border-[var(--border-color)] p-6 rounded-3xl md:rounded-[2rem] shadow-xl flex flex-col mx-0 max-h-[85vh] overflow-y-auto">
                 <div className="flex items-center justify-between mb-6 pb-4 border-b border-[var(--border-color)] flex-shrink-0">
                   <h2 className="text-xl font-bold flex items-center gap-2">
                     <Tent className="text-[var(--color-primary)]" />
@@ -445,7 +445,7 @@ export default function Bivouac() {
                       value={formData.description} 
                       onChange={e => setFormData({...formData, description: e.target.value})} 
                       placeholder="Racontez votre expérience, météo, difficulté..." 
-                      className="bg-[var(--bg-color)] border border-[var(--border-color)] rounded-2xl p-4 focus:border-[var(--color-primary)] focus:ring-1 focus:ring-[var(--color-primary)] outline-none transition-all w-full h-full min-h-[100px] resize-none text-[var(--text-color)]"
+                      className="bg-[var(--bg-color)] border border-[var(--border-color)] rounded-2xl p-4 focus:border-[var(--color-primary)] focus:ring-1 focus:ring-[var(--color-primary)] outline-none transition-all w-full min-h-[140px] shrink-0 resize-none text-[var(--text-color)]"
                     ></textarea>
                   </div>
                 </div>

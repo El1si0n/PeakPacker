@@ -315,10 +315,10 @@ export default function Radar() {
           <p className="text-[var(--text-muted)] font-medium">Analyse du radar...</p>
         </div>
       ) : items.length === 0 ? (
-        <div className="flex flex-col items-center justify-center flex-grow py-20 text-[var(--text-muted)]">
+        <div className="flex flex-col items-center justify-center flex-grow py-20 text-[var(--text-muted)] text-center px-4">
           <RadarIcon size={48} className="mb-6 opacity-20" />
           <h3 className="text-xl font-medium mb-2 text-[var(--text-color)]">Aucune cible repérée</h3>
-          <p>Commencez à repérer vos futurs achats ou ajoutez une nouvelle pièce.</p>
+          <p className="max-w-sm mx-auto">Commencez à repérer vos futurs achats ou ajoutez une nouvelle pièce.</p>
         </div>
       ) : (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">

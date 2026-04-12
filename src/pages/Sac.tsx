@@ -186,7 +186,7 @@ export default function Sac() {
   // MENU VIEW
   if (!selectedConfigId || !activeConfig) {
     return (
-      <div className="pt-16 pb-32 md:pt-28 md:pb-16 px-4 max-w-7xl mx-auto min-h-screen flex flex-col">
+      <div className="pt-8 pb-32 md:pt-28 md:pb-16 px-4 max-w-7xl mx-auto min-h-screen flex flex-col">
         {/* HEADER */}
         <div className="mb-10 text-center md:text-left flex flex-col items-center md:items-start">
           <div className="flex items-center justify-center md:justify-start gap-3 mb-3">

@@ -121,10 +121,10 @@ export function UserMenu({ isOpen, onClose }: { isOpen: boolean, onClose: () => 
     <>
 
       {isOpen && (
-        <div className="fixed inset-0 z-[9999] flex items-center lg:items-stretch justify-center lg:justify-end p-4 lg:p-0 bg-black/60 backdrop-blur-sm animate-in fade-in transition-all" onClick={onClose}>
-          <div onClick={(e) => e.stopPropagation()} className="w-full max-w-sm bg-[var(--bg-color)] shadow-xl rounded-3xl md:rounded-[2rem] lg:rounded-none lg:rounded-l-[2rem] border border-[var(--border-color)] lg:border-y-0 lg:border-r-0 flex flex-col max-h-[85vh] lg:max-h-none lg:h-full overflow-hidden animate-in zoom-in-95 lg:zoom-in-100 lg:slide-in-from-right duration-200">
+        <div className="fixed inset-0 z-[9999] flex items-center lg:items-stretch justify-center lg:justify-end p-0 md:p-4 lg:p-0 bg-black/60 backdrop-blur-sm animate-in fade-in transition-all" onClick={onClose}>
+          <div onClick={(e) => e.stopPropagation()} className="w-full h-full md:h-auto max-w-none md:max-w-sm bg-[var(--bg-color)] shadow-xl rounded-none md:rounded-[2rem] lg:rounded-none lg:rounded-l-[2rem] border-0 md:border border-[var(--border-color)] lg:border-y-0 lg:border-r-0 flex flex-col max-h-[100dvh] md:max-h-[85vh] lg:max-h-none lg:h-full overflow-hidden animate-in zoom-in-95 lg:zoom-in-100 lg:slide-in-from-right duration-200">
             
-            <div className="flex p-6 flex-col gap-8 flex-grow overflow-y-auto">
+            <div className="flex p-6 md:p-8 flex-col gap-6 flex-grow overflow-y-auto">
               {/* Header inside scroll is fine, or sticky */}
               <div className="flex items-center justify-between border-b border-[var(--border-color)] pb-4 shrink-0">
                 <h2 className="text-xl font-bold flex items-center gap-2">

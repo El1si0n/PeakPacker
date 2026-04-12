@@ -235,7 +235,7 @@ export default function Inventaire() {
   });
 
   return (
-    <div className="pt-16 pb-32 md:pt-28 md:pb-16 px-4 max-w-7xl mx-auto min-h-screen flex flex-col">
+    <div className="pt-8 pb-32 md:pt-28 md:pb-16 px-4 max-w-7xl mx-auto min-h-screen flex flex-col">
       <div className="flex flex-col md:flex-row items-center md:items-end justify-between gap-6 mb-8 mt-2 text-center md:text-left">
         <div className="flex flex-col items-center md:items-start">
           <div className="flex items-center justify-center md:justify-start gap-3 mb-2">
@@ -418,10 +418,10 @@ export default function Inventaire() {
           ))}
         </div>
       ) : (
-        <div className="flex flex-col items-center justify-center flex-grow py-20 text-[var(--text-muted)]">
+        <div className="flex flex-col items-center justify-center flex-grow py-20 text-[var(--text-muted)] text-center px-4">
           <Filter size={48} className="mb-6 opacity-20" />
           <h3 className="text-xl font-medium mb-2 text-[var(--text-color)]">Aucun objet trouvé</h3>
-          <p>Essayez de modifier vos filtres ou d'ajouter une nouvelle pièce d'équipement.</p>
+          <p className="max-w-sm mx-auto">Essayez de modifier vos filtres ou d'ajouter une nouvelle pièce d'équipement.</p>
         </div>
       )}
 
