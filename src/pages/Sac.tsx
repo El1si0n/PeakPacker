@@ -2,7 +2,7 @@ import { useState, useMemo, useEffect } from "react";
 import { PieChart, Pie, Cell, ResponsiveContainer, Sector } from "recharts";
 import { 
   Plus, Trash2, Weight, Shirt, Droplet, Archive, Backpack, X, 
-  Search, Filter, SlidersHorizontal, ArrowDownAZ, Tag, ChevronLeft, Minus, Share2
+  Search, Filter, SlidersHorizontal, ArrowDownAZ, Tag, ChevronLeft, Minus, Share2, PackagePlus
 } from "lucide-react";
 import type { Item, PackItem, Category, PackConfig } from "../types";
 import { getCategoryIcon } from "../lib/icons";
@@ -188,7 +188,7 @@ export default function Sac() {
     return (
       <div className="pt-8 pb-32 md:pt-28 md:pb-16 px-4 max-w-7xl mx-auto min-h-screen flex flex-col">
         {/* HEADER */}
-        <div className="mb-10 flex flex-col items-start gap-1">
+        <div className="mb-8 flex flex-col items-start gap-1">
           <div className="flex items-center gap-3 mb-2">
             <Backpack className="text-[var(--color-primary)] w-10 h-10 flex-shrink-0" />
             <h1 className="text-4xl md:text-5xl font-bold tracking-tight text-[var(--text-color)]">
@@ -389,7 +389,7 @@ export default function Sac() {
   return (
     <div className="pt-8 pb-32 md:pt-28 md:pb-16 px-4 max-w-7xl mx-auto min-h-screen flex flex-col">
       {/* HEADER DETAILED VIEW */}
-      <div className="flex flex-col md:flex-row md:items-start justify-between gap-6 mb-10 border-b border-[var(--border-color)] pb-6">
+      <div className="flex flex-col md:flex-row md:items-start justify-between gap-6 mb-8 border-b border-[var(--border-color)] pb-6">
         <div className="flex-grow w-full">
           <button 
             onClick={() => setSelectedConfigId(null)}
@@ -697,8 +697,8 @@ export default function Sac() {
           <div className="bg-[var(--bg-color)] border border-[var(--border-color)] w-full max-w-2xl rounded-3xl shadow-2xl flex flex-col overflow-hidden max-h-[90vh] sm:max-h-[85vh] zoom-in-95 animate-in">
             {/* Modal Header */}
             <div className="p-5 border-b border-[var(--border-color)] flex items-center justify-between bg-[var(--surface-color)]">
-              <h2 className="text-xl font-bold flex items-center gap-2">
-                <Search size={24} className="text-[var(--text-muted)] hidden sm:block" />
+              <h2 className="text-2xl font-bold text-[var(--text-color)] tracking-tight flex items-center gap-3">
+                <PackagePlus size={28} className="text-[var(--color-primary)] hidden sm:block" />
                 Ajouter depuis l'inventaire
               </h2>
               <button 

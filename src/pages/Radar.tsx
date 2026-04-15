@@ -11,6 +11,8 @@ import { BRANDS_DIRECTORY as MOCK_BRANDS } from "../lib/brands";
 import type { Item } from "../types";
 
 import { getCategoryIcon } from "../lib/icons";
+import { EmptyState } from "../components/EmptyState";
+import { motion, AnimatePresence } from "framer-motion";
 
 function BrandCard({ brand }: { brand: typeof MOCK_BRANDS[0] }) {
   const [error, setError] = useState(false);
@@ -315,22 +317,32 @@ export default function Radar() {
           <p className="text-[var(--text-muted)] font-medium">Analyse du radar...</p>
         </div>
       ) : items.length === 0 ? (
-        <div className="flex flex-col items-center justify-center flex-grow py-20 text-[var(--text-muted)] text-center px-4">
-          <RadarIcon size={48} className="mb-6 opacity-20" />
-          <h3 className="text-xl font-medium mb-2 text-[var(--text-color)]">Aucune cible repérée</h3>
-          <p className="max-w-sm mx-auto">Commencez à repérer vos futurs achats ou ajoutez une nouvelle pièce.</p>
-        </div>
+        <EmptyState 
+          icon={<RadarIcon size={40} className="stroke-[1.5]" />}
+          title="Aucune cible repérée"
+          description="Commencez à repérer vos futurs achats ou ajoutez une nouvelle pièce."
+        />
       ) : (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-          {items.map(item => (
-            <RadarItemCard 
-              key={item.id} 
-              item={item} 
-              onEdit={() => { setEditingItem(item); setIsModalOpen(true); }}
-              onDelete={() => handleDelete(item.id)}
-              onBuy={() => handleBuy(item)}
-            />
-          ))}
+          <AnimatePresence>
+            {items.map(item => (
+              <motion.div
+                key={item.id}
+                layout
+                initial={{ opacity: 0, scale: 0.9 }}
+                animate={{ opacity: 1, scale: 1 }}
+                exit={{ opacity: 0, scale: 0.9, transition: { duration: 0.2 } }}
+                transition={{ duration: 0.3 }}
+              >
+                <RadarItemCard 
+                  item={item} 
+                  onEdit={() => { setEditingItem(item); setIsModalOpen(true); }}
+                  onDelete={() => handleDelete(item.id)}
+                  onBuy={() => handleBuy(item)}
+                />
+              </motion.div>
+            ))}
+          </AnimatePresence>
         </div>
       )}
 

@@ -3,6 +3,8 @@ import { Plus, Search, Filter, SlidersHorizontal, ArrowDownAZ, Weight, Tag, Box,
 import type { Item, Category } from "../types";
 import { ItemCard } from "../components/ItemCard";
 import { ItemModal } from "../components/ItemModal";
+import { EmptyState } from "../components/EmptyState";
+import { motion, AnimatePresence } from "framer-motion";
 import { supabase } from "../lib/supabase";
 import { useAuth } from "../contexts/AuthContext";
 import { useUI } from "../contexts/UIContext";
@@ -92,6 +94,7 @@ export default function Inventaire() {
   };
 
   const handleDelete = async (id: string) => {
+    const itemToDelete = items.find(i => i.id === id);
     confirm({
       title: "Supprimer cet équipement ?",
       message: "Cette action est irréversible et retirera cet équipement de vos sacs.",
@@ -105,6 +108,13 @@ export default function Inventaire() {
           toast({ message: "Erreur lors de la suppression.", type: "error" });
           console.error(error);
         } else {
+          // Cleanup de l'image orpheline dans Supabase Storage
+          if (itemToDelete?.image_url && itemToDelete.image_url.includes('/storage/v1/object/public/images/')) {
+            const matches = itemToDelete.image_url.match(/public\/images\/(.+)$/);
+            if (matches && matches[1]) {
+              supabase.storage.from('images').remove([matches[1]]).catch(console.warn);
+            }
+          }
           toast({ message: "Équipement supprimé avec succès." });
           fetchItems();
         }
@@ -291,10 +301,10 @@ export default function Inventaire() {
           
           {/* Import/Export */}
            <div className="hidden md:flex gap-2 ml-1">
-             <button onClick={() => fileInputRef.current?.click()} className="flex items-center justify-center w-12 h-12 bg-[var(--surface-color)] border border-[var(--border-color)] rounded-full text-[var(--text-muted)] hover:text-[var(--text-color)] hover:border-[var(--color-primary)] transition-all" title="Importer (CSV)">
+             <button onClick={() => fileInputRef.current?.click()} className="flex items-center justify-center w-12 h-12 bg-[var(--surface-color)] border border-[var(--border-color)] rounded-full text-[var(--text-muted)] hover:text-[var(--color-primary)] hover:border-[var(--color-primary)] transition-all" title="Importer (CSV)">
                <Upload size={20} />
              </button>
-             <button onClick={handleExport} className="flex items-center justify-center w-12 h-12 bg-[var(--surface-color)] border border-[var(--border-color)] rounded-full text-[var(--text-muted)] hover:text-[var(--text-color)] hover:border-[var(--color-primary)] transition-all" title="Exporter (CSV)">
+             <button onClick={handleExport} className="flex items-center justify-center w-12 h-12 bg-[var(--surface-color)] border border-[var(--border-color)] rounded-full text-[var(--text-muted)] hover:text-[var(--color-primary)] hover:border-[var(--color-primary)] transition-all" title="Exporter (CSV)">
                <Download size={20} />
              </button>
              <input type="file" ref={fileInputRef} accept=".csv" className="hidden" onChange={handleImport} />
@@ -408,21 +418,31 @@ export default function Inventaire() {
         </div>
       ) : filteredItems.length > 0 ? (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 pb-20">
-          {filteredItems.map((item) => (
-            <ItemCard 
-              key={item.id} 
-              item={item} 
-              onEdit={() => { setEditingItem(item); setIsModalOpen(true); }}
-              onDelete={() => handleDelete(item.id)}
-            />
-          ))}
+          <AnimatePresence>
+            {filteredItems.map((item) => (
+              <motion.div
+                key={item.id}
+                layout
+                initial={{ opacity: 0, scale: 0.9 }}
+                animate={{ opacity: 1, scale: 1 }}
+                exit={{ opacity: 0, scale: 0.9, transition: { duration: 0.2 } }}
+                transition={{ duration: 0.3 }}
+              >
+                <ItemCard 
+                  item={item} 
+                  onEdit={() => { setEditingItem(item); setIsModalOpen(true); }}
+                  onDelete={() => handleDelete(item.id)}
+                />
+              </motion.div>
+            ))}
+          </AnimatePresence>
         </div>
       ) : (
-        <div className="flex flex-col items-center justify-center flex-grow py-20 text-[var(--text-muted)] text-center px-4">
-          <Filter size={48} className="mb-6 opacity-20" />
-          <h3 className="text-xl font-medium mb-2 text-[var(--text-color)]">Aucun objet trouvé</h3>
-          <p className="max-w-sm mx-auto">Essayez de modifier vos filtres ou d'ajouter une nouvelle pièce d'équipement.</p>
-        </div>
+        <EmptyState 
+          icon={<Filter size={40} className="stroke-[1.5]" />}
+          title="Aucun objet trouvé"
+          description="Essayez de modifier vos filtres ou d'ajouter une nouvelle pièce d'équipement."
+        />
       )}
 
       {/* Modal d'ajout/modification */}

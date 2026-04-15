@@ -3,6 +3,7 @@ import { supabase } from "../lib/supabase";
 import { useAuth } from "../contexts/AuthContext";
 import { useUI } from "../contexts/UIContext";
 import { getBagIcon } from "../lib/bagIcons";
+import confetti from 'canvas-confetti';
 import { CheckSquare, Plus, Trash2, Check, RefreshCw, GripVertical, PackagePlus, ChevronDown, Printer } from "lucide-react";
 import {
   DndContext,
@@ -223,7 +224,41 @@ export default function CheckPoint() {
     if (!task) return;
     const newCompleted = !task.completed;
     
-    setTasks(tasks.map(t => t.id === id ? { ...t, completed: newCompleted } : t));
+    const newTasks = tasks.map(t => t.id === id ? { ...t, completed: newCompleted } : t);
+    setTasks(newTasks);
+
+    if (newCompleted) {
+      const catTasks = newTasks.filter(t => t.category === task.category);
+      const isCatComplete = catTasks.length > 0 && catTasks.every(t => t.completed);
+      const allTasks = newTasks.filter(t => t.text.trim() !== "");
+      const isAllComplete = allTasks.length > 0 && allTasks.every(t => t.completed);
+
+      if (isAllComplete) {
+        confetti({
+          particleCount: 150,
+          spread: 80,
+          origin: { y: 0.6 },
+          colors: ['#f97316', '#22c55e', '#3b82f6'],
+          zIndex: 9999
+        });
+      } else if (isCatComplete) {
+        const catColorMap: Record<string, string> = { 
+          "Général": "#f97316", 
+          "Courses": "#3b82f6", 
+          "Équipement": "#10b981" 
+        };
+        const catColor = catColorMap[task.category] || "#22c55e";
+
+        confetti({
+          particleCount: 60,
+          spread: 60,
+          origin: { y: 0.7 },
+          colors: [catColor],
+          zIndex: 9999
+        });
+      }
+    }
+
     await supabase.from('tasks').update({ completed: newCompleted }).eq('id', id);
   };
 
@@ -377,7 +412,7 @@ export default function CheckPoint() {
         </div>
       </div>
       {/* HEADER ECRAN */}
-      <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-10 print:hidden">
+      <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-8 print:hidden">
         <div className="flex flex-col items-start">
           <div className="flex items-center gap-3 mb-2">
             <CheckSquare className="text-[var(--color-primary)] w-10 h-10 flex-shrink-0" />

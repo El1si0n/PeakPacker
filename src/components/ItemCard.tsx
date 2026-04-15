@@ -11,7 +11,9 @@ export function ItemCard({ item, onEdit, onDelete }: { item: Item, onEdit?: () =
         {item.image_url ? (
           <img src={item.image_url} alt={item.name} className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" />
         ) : (
-          <div className="text-[var(--text-muted)] text-sm font-medium">Aucune image</div>
+          <div className="text-[var(--text-muted)] opacity-[0.15] transform scale-[5]">
+             {getCategoryIcon(item.category)}
+          </div>
         )}
         
         {/* Badge catégorie en haut à gauche */}

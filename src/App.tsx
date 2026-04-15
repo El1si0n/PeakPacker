@@ -1,4 +1,4 @@
-import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router-dom";
+import { BrowserRouter as Router, Routes, Route, Navigate, useLocation } from "react-router-dom";
 import { FloatingNav } from "./components/FloatingNav";
 import Inventaire from "./pages/Inventaire";
 import Sac from "./pages/Sac";
@@ -9,6 +9,25 @@ import Auth from "./pages/Auth";
 import SharePack from "./pages/SharePack";
 import { useAuth } from "./contexts/AuthContext";
 import { Loader2 } from "lucide-react";
+import { AnimatePresence } from "framer-motion";
+import { AnimatedPage } from "./components/AnimatedPage";
+
+function AnimatedRoutes() {
+  const location = useLocation();
+  
+  return (
+    <AnimatePresence mode="wait">
+      <Routes location={location} key={location.pathname}>
+        <Route path="/" element={<AnimatedPage><Inventaire /></AnimatedPage>} />
+        <Route path="/sac" element={<AnimatedPage><Sac /></AnimatedPage>} />
+        <Route path="/checkpoint" element={<AnimatedPage><CheckPoint /></AnimatedPage>} />
+        <Route path="/bivouac" element={<AnimatedPage><Bivouac /></AnimatedPage>} />
+        <Route path="/radar" element={<AnimatedPage><Radar /></AnimatedPage>} />
+        <Route path="*" element={<Navigate to="/" replace />} />
+      </Routes>
+    </AnimatePresence>
+  );
+}
 
 function App() {
   const { session, loading } = useAuth();
@@ -30,15 +49,8 @@ function App() {
             !session ? <Auth /> : (
               <>
                 <FloatingNav />
-                <main className="flex-1">
-                  <Routes>
-                    <Route path="/" element={<Inventaire />} />
-                    <Route path="/sac" element={<Sac />} />
-                    <Route path="/checkpoint" element={<CheckPoint />} />
-                    <Route path="/bivouac" element={<Bivouac />} />
-                    <Route path="/radar" element={<Radar />} />
-                    <Route path="*" element={<Navigate to="/" replace />} />
-                  </Routes>
+                <main className="flex-1 overflow-x-hidden">
+                  <AnimatedRoutes />
                 </main>
               </>
             )

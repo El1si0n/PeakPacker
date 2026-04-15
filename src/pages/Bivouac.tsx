@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { supabase } from "../lib/supabase";
 import { useAuth } from "../contexts/AuthContext";
 import { useUI } from "../contexts/UIContext";
-import { MapPin, Star, Calendar, Plus, Tent, X, Save, Map, Trash2, Pencil, Sun, Cloud, CloudRain, Snowflake, Wind, Layers } from "lucide-react";
+import { MapPin, Star, Calendar, Plus, Tent, X, Save, Map, Trash2, Pencil, Sun, Cloud, CloudRain, Snowflake, Wind, Layers, UploadCloud, Check, Loader2 } from "lucide-react";
 import { MapContainer, TileLayer, Marker, useMapEvents, useMap, ZoomControl } from "react-leaflet";
 import L from "leaflet";
 import "leaflet/dist/leaflet.css";
@@ -30,11 +30,11 @@ const WEATHER_ICONS: Record<string, any> = {
 
 // Custom map marker using Tailwind and CSS variables
 const createBivouacIcon = (isHovered: boolean = false) => new L.DivIcon({
-  html: `<div style="background-color: ${isHovered ? 'var(--color-primary)' : 'var(--surface-color)'}; color: ${isHovered ? 'var(--bg-color)' : 'var(--color-primary)'}; width: 40px; height: 40px; display: flex; align-items: center; justify-content: center; border-radius: 50%; box-shadow: 0 8px 16px rgba(0,0,0,0.15); border: 2px solid ${isHovered ? 'var(--bg-color)' : 'var(--border-color)'}; transition: all 0.2s cubic-bezier(0.34, 1.56, 0.64, 1); transform: ${isHovered ? 'scale(1.1)' : 'scale(1)'};"><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3.5 21 14 3"/><path d="M20.5 21 10 3"/><path d="M15.5 21 12 15l-3.5 6"/><path d="M2 21h20"/></svg></div>`,
+  html: `<div style="background-color: color-mix(in srgb, var(--surface-color) 90%, transparent); backdrop-filter: blur(8px); color: var(--color-primary); width: 44px; height: 44px; display: flex; align-items: center; justify-content: center; border-radius: 50%; box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05); border: 1px solid ${isHovered ? 'var(--color-primary)' : 'var(--border-color)'}; transition: all 0.2s cubic-bezier(0.34, 1.56, 0.64, 1); transform: ${isHovered ? 'scale(1.05)' : 'scale(1)'};"><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3.5 21 14 3"/><path d="M20.5 21 10 3"/><path d="M15.5 21 12 15l-3.5 6"/><path d="M2 21h20"/></svg></div>`,
   className: "bg-transparent border-none",
-  iconSize: [40, 40],
-  iconAnchor: [20, 20],
-  popupAnchor: [0, -20],
+  iconSize: [44, 44],
+  iconAnchor: [22, 22],
+  popupAnchor: [0, -22],
 });
 
 // Component to handle map clicks and dynamically adding logs
@@ -94,7 +94,7 @@ export default function Bivouac() {
   const [draftLocation, setDraftLocation] = useState<{lat: number, lng: number} | null>(null);
   
   const [gpsInput, setGpsInput] = useState("");
-  const [mapStyle, setMapStyle] = useState<"voyager" | "topo">("voyager");
+  const [mapStyle, setMapStyle] = useState<"voyager" | "satellite" | "topo">("voyager");
   
   const [formData, setFormData] = useState({
     title: "",
@@ -105,6 +105,43 @@ export default function Bivouac() {
     image_url: "",
     weather: "Sun"
   });
+
+  const [isUploadingImage, setIsUploadingImage] = useState(false);
+
+  const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    if (file.size > 5 * 1024 * 1024) {
+      toast({ message: "L'image ne doit pas dépasser 5mo.", type: "error" });
+      return;
+    }
+
+    try {
+      setIsUploadingImage(true);
+      
+      const fileExt = file.name.split('.').pop();
+      const fileName = `${Math.random().toString(36).substring(2, 15)}_${Date.now()}.${fileExt}`;
+      const { data: { session } } = await supabase.auth.getSession();
+      const userId = session?.user?.id || 'anonymous';
+      const filePath = `${userId}/${fileName}`;
+
+      const { error: uploadError } = await supabase.storage.from('images').upload(filePath, file, { cacheControl: '3600', upsert: false });
+      
+      if (uploadError) throw uploadError;
+
+      const { data } = supabase.storage.from('images').getPublicUrl(filePath);
+      
+      setFormData(prev => ({ ...prev, image_url: data.publicUrl }));
+      toast({ message: "Image importée avec succès ! 🎉" });
+      
+    } catch (err: any) {
+      console.error("Upload error:", err);
+      toast({ message: "Erreur d'import. Le bucket 'images' est-il bien public ?", type: "error" });
+    } finally {
+      setIsUploadingImage(false);
+    }
+  };
 
   useEffect(() => {
     if (user) {
@@ -155,6 +192,7 @@ export default function Bivouac() {
   };
 
   const deleteLog = async (id: string) => {
+    const logToDelete = logs.find(l => l.id === id);
     confirm({
       title: "Supprimer ce spot ?",
       message: "Cette action est irréversible et effacera toutes les informations liées à ce spot.",
@@ -163,6 +201,14 @@ export default function Bivouac() {
         setLogs(logs.filter(l => l.id !== id));
         setActiveLogId(null);
         await supabase.from('bivouac_spots').delete().eq('id', id);
+        
+        if (logToDelete?.image_url && logToDelete.image_url.includes('/storage/v1/object/public/images/')) {
+          const matches = logToDelete.image_url.match(/public\/images\/(.+)$/);
+          if (matches && matches[1]) {
+            supabase.storage.from('images').remove([matches[1]]).catch(console.warn);
+          }
+        }
+        
         toast({ message: "Spot supprimé avec succès." });
       }
     });
@@ -186,6 +232,17 @@ export default function Bivouac() {
 
     try {
       if (editingLogId) {
+        // Cleanup old image if changed
+        const oldLog = logs.find(l => l.id === editingLogId);
+        if (oldLog?.image_url && oldLog.image_url !== formData.image_url) {
+          if (oldLog.image_url.includes('/storage/v1/object/public/images/')) {
+            const matches = oldLog.image_url.match(/public\/images\/(.+)$/);
+            if (matches && matches[1]) {
+              supabase.storage.from('images').remove([matches[1]]).catch(console.warn);
+            }
+          }
+        }
+        
         const { data } = await supabase.from('bivouac_spots').update(newLog).eq('id', editingLogId).select().single();
         if (data) {
           setLogs(logs.map(l => l.id === editingLogId ? (data as BivouacLog) : l));
@@ -337,9 +394,9 @@ export default function Bivouac() {
              {showDrawer && !activeLogId && (
               <div className="bg-[var(--surface-color)] border border-[var(--border-color)] p-6 rounded-3xl md:rounded-[2rem] shadow-xl flex flex-col mx-0">
                 <div className="flex items-center justify-between mb-6 pb-4 border-b border-[var(--border-color)] flex-shrink-0">
-                  <h2 className="text-xl font-bold flex items-center gap-2">
-                    <Tent className="text-[var(--color-primary)]" />
-                    Nouveau Spot
+                  <h2 className="text-2xl font-bold text-[var(--text-color)] tracking-tight flex items-center gap-3">
+                    <Tent size={28} className="text-[var(--color-primary)]" />
+                    {editingLogId ? 'Modifier le spot' : 'Nouveau spot'}
                   </h2>
                   <button onClick={() => setShowDrawer(false)} className="p-2 text-[var(--text-muted)] hover:bg-[var(--bg-color)] rounded-full transition-colors">
                     <X size={20} />
@@ -432,14 +489,58 @@ export default function Bivouac() {
                   </div>
 
                   <div className="flex flex-col gap-1.5">
-                    <label className="text-xs font-bold uppercase tracking-wider text-[var(--text-muted)] pl-2">Photo de couverture (URL)</label>
-                    <input 
-                      type="text" 
-                      value={formData.image_url} 
-                      onChange={e => setFormData({...formData, image_url: e.target.value})} 
-                      placeholder="https://..." 
-                      className="bg-[var(--bg-color)] border border-[var(--border-color)] rounded-2xl px-4 py-3 focus:border-[var(--color-primary)] focus:ring-1 focus:ring-[var(--color-primary)] outline-none transition-all w-full text-[var(--text-color)]" 
-                    />
+                    <label className="text-xs font-bold uppercase tracking-wider text-[var(--text-muted)] flex justify-between items-center pl-2">
+                      <span>Photo de couverture</span>
+                      {isUploadingImage && <Loader2 size={12} className="animate-spin text-[var(--color-primary)]" />}
+                    </label>
+                    <div className="flex flex-col gap-2">
+                        {/* Zone Drop/Upload */}
+                        <div className="relative">
+                          <label className={`w-full flex items-center justify-center gap-2 h-[52px] bg-[var(--surface-color)] border-2 border-dashed ${formData.image_url && !formData.image_url.startsWith('https://') ? 'border-[var(--color-primary)]' : 'border-[var(--border-color)]'} rounded-2xl cursor-pointer hover:border-[var(--color-primary)] transition-all overflow-hidden relative`}>
+                            {formData.image_url ? (
+                              <>
+                                <img src={formData.image_url} alt="Preview" className="absolute inset-0 w-full h-full object-cover opacity-30" />
+                                <span className="relative z-10 font-bold text-[var(--color-primary)] flex items-center gap-2"><Check size={16} /> Importée</span>
+                              </>
+                            ) : (
+                              <>
+                                <UploadCloud size={20} className="text-[var(--text-muted)]" />
+                                <span className="text-sm font-medium text-[var(--text-muted)]">Prendre photo / Importer</span>
+                              </>
+                            )}
+                            <input 
+                              type="file" 
+                              accept="image/*"
+                              className="hidden" 
+                              onChange={handleImageUpload}
+                              disabled={isUploadingImage}
+                            />
+                          </label>
+                          
+                          {formData.image_url && (
+                            <button
+                              type="button"
+                              onClick={(e) => {
+                                e.preventDefault();
+                                setFormData({...formData, image_url: ''});
+                              }}
+                              className="absolute right-2 top-1/2 -translate-y-1/2 p-1.5 bg-[var(--bg-color)] backdrop-blur-md rounded-full text-[var(--text-muted)] hover:text-red-500 hover:bg-red-500/10 transition-colors z-20 shadow-sm border border-[var(--border-color)]"
+                              title="Retirer l'image"
+                            >
+                              <Trash2 size={14} />
+                            </button>
+                          )}
+                        </div>
+                        
+                        {/* URL Manuelle */}
+                        <input 
+                          type="url" 
+                          value={formData.image_url} 
+                          onChange={e => setFormData({...formData, image_url: e.target.value})} 
+                          className="w-full h-[40px] bg-[var(--bg-color)] border-2 border-[var(--border-color)] rounded-xl px-3 outline-none focus:border-[var(--color-primary)] transition-all text-sm text-[var(--text-color)]"
+                          placeholder="Ou coller une URL..."
+                        />
+                      </div>
                   </div>
 
                   <div className="flex flex-col gap-1.5 flex-grow">
@@ -469,17 +570,17 @@ export default function Bivouac() {
         )}
 
         {/* RIGHT: Map Container */}
-        <div className={`flex-grow min-h-[50dvh] md:min-h-[400px] lg:min-h-[600px] border border-[var(--border-color)] rounded-3xl shadow-sm overflow-hidden relative ${(!activeLogId && !showDrawer) ? 'w-full block' : 'hidden lg:block lg:w-2/3'}`}>
+        <div className={`z-0 flex-grow min-h-[50dvh] md:min-h-[400px] lg:min-h-[600px] border border-[var(--border-color)] rounded-3xl shadow-sm overflow-hidden relative ${(!activeLogId && !showDrawer) ? 'w-full block' : 'hidden lg:block lg:w-2/3'}`}>
           {/* Subtle map overlay gradient for premium feel */}
           <div className="absolute inset-0 pointer-events-none shadow-[inset_0_0_40px_rgba(0,0,0,0.1)] z-10"></div>
           
           <div className="absolute top-4 left-4 z-[400] flex gap-3 flex-wrap">
-            <div className="bg-[var(--surface-color)]/90 backdrop-blur border border-[var(--border-color)] px-4 py-2 rounded-full flex items-center gap-2 shadow-sm">
-              <Tent size={16} className="text-[var(--text-muted)]" />
+            <div className="bg-[var(--surface-color)]/90 backdrop-blur border border-[var(--border-color)] px-4 h-[44px] rounded-full flex items-center gap-2 shadow-[0_1px_2px_rgba(0,0,0,0.05)] text-[var(--text-color)]">
+              <Tent size={18} />
               <span className="font-bold text-sm text-[var(--text-color)]">{logs.length} Nuits</span>
             </div>
-            <div className="bg-[var(--surface-color)]/90 backdrop-blur border border-[var(--border-color)] px-4 py-2 rounded-full flex items-center gap-2 shadow-sm">
-              <Star size={16} className="text-[var(--text-muted)]" />
+            <div className="bg-[var(--surface-color)]/90 backdrop-blur border border-[var(--border-color)] px-4 h-[44px] rounded-full flex items-center gap-2 shadow-[0_1px_2px_rgba(0,0,0,0.05)] text-[var(--text-color)]">
+              <Star size={18} />
               <span className="font-bold text-sm text-[var(--text-color)]">
                 {logs.length > 0 ? (logs.reduce((acc, l) => acc + l.rating, 0) / logs.length).toFixed(1) : "-"} Moyenne
               </span>
@@ -487,8 +588,8 @@ export default function Bivouac() {
           </div>
 
           <button 
-            onClick={() => setMapStyle(mapStyle === "voyager" ? "topo" : "voyager")}
-            className="absolute top-4 right-4 z-[400] bg-[var(--surface-color)]/90 backdrop-blur border border-[var(--border-color)] p-2.5 flex items-center justify-center rounded-full shadow-sm text-[var(--text-color)] hover:text-[var(--color-primary)] hover:border-[var(--color-primary)] transition-all group"
+            onClick={() => setMapStyle(mapStyle === "voyager" ? "topo" : mapStyle === "topo" ? "satellite" : "voyager")}
+            className="absolute top-4 right-4 z-[400] bg-[var(--surface-color)]/90 backdrop-blur border border-[var(--border-color)] w-[44px] h-[44px] flex items-center justify-center rounded-full shadow-[0_1px_2px_rgba(0,0,0,0.05)] text-[var(--text-color)] hover:text-[var(--color-primary)] hover:border-[var(--color-primary)] transition-all group"
             title="Changer de fond de carte"
           >
             <Layers size={20} className="group-active:scale-95 transition-transform" />
@@ -507,6 +608,11 @@ export default function Bivouac() {
               <TileLayer
                 attribution=""
                 url="https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png"
+              />
+            ) : mapStyle === "satellite" ? (
+              <TileLayer
+                attribution=""
+                url="https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}"
               />
             ) : (
               <TileLayer

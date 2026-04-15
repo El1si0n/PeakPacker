@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { LogOut, Moon, Sun, Settings, Box, Backpack, Map, X, Lock, Mail } from "lucide-react";
+import { motion, AnimatePresence } from "framer-motion";
 import { useAuth } from "../contexts/AuthContext";
 import { useUI } from "../contexts/UIContext";
 import { supabase } from "../lib/supabase";
@@ -8,12 +9,15 @@ export function UserMenu({ isOpen, onClose }: { isOpen: boolean, onClose: () => 
   const { user, signOut } = useAuth();
   const { toast, confirm } = useUI();
   const [theme, setTheme] = useState<"light" | "dark">("light");
+  const isMobile = window.innerWidth < 768;
   
   const [stats, setStats] = useState({ items: 0, bags: 0, bivouacs: 0 });
   const [newPassword, setNewPassword] = useState("");
   const [newEmail, setNewEmail] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [isEmailLoading, setIsEmailLoading] = useState(false);
+  const [currency, setCurrency] = useState(localStorage.getItem('preferred_devise') || '€');
+  const [language, setLanguage] = useState(localStorage.getItem('preferred_language') || 'fr');
 
   useEffect(() => {
     // Initialize theme
@@ -118,17 +122,29 @@ export function UserMenu({ isOpen, onClose }: { isOpen: boolean, onClose: () => 
   };
 
   return (
-    <>
-
+    <AnimatePresence>
       {isOpen && (
-        <div className="fixed inset-0 z-[9999] flex items-center lg:items-stretch justify-center lg:justify-end p-0 md:p-4 lg:p-0 bg-black/60 backdrop-blur-sm animate-in fade-in transition-all" onClick={onClose}>
-          <div onClick={(e) => e.stopPropagation()} className="w-full h-full md:h-auto max-w-none md:max-w-sm bg-[var(--bg-color)] shadow-xl rounded-none md:rounded-[2rem] lg:rounded-none lg:rounded-l-[2rem] border-0 md:border border-[var(--border-color)] lg:border-y-0 lg:border-r-0 flex flex-col max-h-[100dvh] md:max-h-[85vh] lg:max-h-none lg:h-full overflow-hidden animate-in zoom-in-95 lg:zoom-in-100 lg:slide-in-from-right duration-200">
+        <motion.div 
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+          className="fixed inset-0 z-[9999] flex items-center lg:items-stretch justify-center lg:justify-end p-0 md:p-4 lg:p-0 bg-black/60 backdrop-blur-sm transition-all" 
+          onClick={onClose}
+        >
+          <motion.div 
+            initial={isMobile ? { opacity: 0, scale: 0.95, y: 20 } : { x: "100%" }}
+            animate={isMobile ? { opacity: 1, scale: 1, y: 0 } : { x: 0 }}
+            exit={isMobile ? { opacity: 0, scale: 0.95, y: 20 } : { x: "100%" }}
+            transition={{ type: "tween", duration: 0.25, ease: "easeOut" }}
+            onClick={(e) => e.stopPropagation()} 
+            className="w-full h-full md:h-auto max-w-none md:max-w-sm bg-[var(--bg-color)] shadow-2xl rounded-none md:rounded-[2rem] lg:rounded-none lg:rounded-l-[2rem] border-0 md:border border-[var(--border-color)] lg:border-y-0 lg:border-r-0 flex flex-col max-h-[100dvh] md:max-h-[85vh] lg:max-h-none lg:h-full overflow-hidden"
+          >
             
             <div className="flex p-6 md:p-8 flex-col gap-6 flex-grow overflow-y-auto">
               {/* Header inside scroll is fine, or sticky */}
               <div className="flex items-center justify-between border-b border-[var(--border-color)] pb-4 shrink-0">
-                <h2 className="text-xl font-bold flex items-center gap-2">
-                  <Settings className="text-[var(--color-primary)]" />
+                <h2 className="text-2xl font-bold text-[var(--text-color)] tracking-tight flex items-center gap-3">
+                  <Settings size={28} className="text-[var(--color-primary)]" />
                   Mon Espace
                 </h2>
                 <button onClick={onClose} className="p-2 text-[var(--text-muted)] hover:bg-[var(--surface-color)] rounded-full transition-colors">
@@ -176,6 +192,54 @@ export function UserMenu({ isOpen, onClose }: { isOpen: boolean, onClose: () => 
                     <Moon size={18} />
                     Sombre
                   </button>
+                </div>
+              </div>
+
+              {/* Preferences (Settings) */}
+              <div className="flex flex-col gap-3">
+                <h3 className="text-xs font-bold uppercase tracking-wider text-[var(--text-muted)]">Préférences</h3>
+                <div className="bg-[var(--surface-color)] border border-[var(--border-color)] p-4 rounded-2xl grid grid-cols-2 gap-4">
+                  <div className="flex flex-col gap-2">
+                    <span className="text-xs text-[var(--text-muted)] font-medium">Devise</span>
+                    <div className="relative">
+                      <select 
+                        value={currency}
+                        onChange={(e) => {
+                          setCurrency(e.target.value);
+                          localStorage.setItem('preferred_devise', e.target.value);
+                        }}
+                        className="w-full bg-[var(--bg-color)] border border-[var(--border-color)] rounded-xl py-2.5 px-3 text-sm focus:border-[var(--color-primary)] outline-none text-[var(--text-color)] font-bold appearance-none cursor-pointer"
+                      >
+                        <option value="€">€</option>
+                        <option value="$">$</option>
+                        <option value="£">£</option>
+                        <option value="CHF">CHF</option>
+                      </select>
+                      <div className="absolute right-2 top-1/2 -translate-y-1/2 pointer-events-none text-[var(--text-muted)]">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="m6 9 6 6 6-6"/></svg>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="flex flex-col gap-2">
+                    <span className="text-xs text-[var(--text-muted)] font-medium">Langue</span>
+                    <div className="relative">
+                      <select 
+                        value={language}
+                        onChange={(e) => {
+                          setLanguage(e.target.value);
+                          localStorage.setItem('preferred_language', e.target.value);
+                        }}
+                        className="w-full bg-[var(--bg-color)] border border-[var(--border-color)] rounded-xl py-2.5 px-3 text-sm focus:border-[var(--color-primary)] outline-none text-[var(--text-color)] font-bold appearance-none cursor-pointer"
+                      >
+                        <option value="fr">Français</option>
+                        <option value="en">Anglais (Bientôt)</option>
+                      </select>
+                      <div className="absolute right-2 top-1/2 -translate-y-1/2 pointer-events-none text-[var(--text-muted)]">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="m6 9 6 6 6-6"/></svg>
+                      </div>
+                    </div>
+                  </div>
                 </div>
               </div>
 
@@ -239,11 +303,12 @@ export function UserMenu({ isOpen, onClose }: { isOpen: boolean, onClose: () => 
                   </div>
                 </div>
               </div>
+            </div>
 
-            <div className="pt-4 border-t border-[var(--border-color)] flex flex-col gap-3 shrink-0">
+            <div className="px-6 pb-4 md:px-8 md:pb-4 pt-4 border-t border-[var(--border-color)] flex flex-col gap-3 shrink-0 bg-[var(--bg-color)] z-10">
               <button 
                 onClick={signOut}
-                className="w-full flex items-center justify-center gap-2 bg-red-500/10 text-red-500 hover:bg-red-500/20 font-bold py-3 rounded-2xl transition-all"
+                className="w-full flex items-center justify-center gap-2 bg-red-500/10 text-red-500 hover:bg-red-500/20 font-bold py-3.5 rounded-2xl transition-all"
               >
                 <LogOut size={20} />
                 Se déconnecter
@@ -257,10 +322,9 @@ export function UserMenu({ isOpen, onClose }: { isOpen: boolean, onClose: () => 
               </button>
             </div>
 
-            </div>
-          </div>
-        </div>
+          </motion.div>
+        </motion.div>
       )}
-    </>
+    </AnimatePresence>
   );
 }
