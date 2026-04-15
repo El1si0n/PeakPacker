@@ -1,11 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import type { Item, Category } from '../types';
-import { X, Save, Loader2, Link as LinkIcon, Image as ImageIcon, Weight, Tag, Pencil, Grid, PackagePlus, Info, UploadCloud, Check, Trash2 } from 'lucide-react';
+import { X, Save, Loader2, Link as LinkIcon, Image as ImageIcon, Pencil, Grid, PackagePlus, Info } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 import { BRANDS_DIRECTORY } from '../lib/brands';
 import { useUI } from '../contexts/UIContext';
 import { motion, AnimatePresence } from 'framer-motion';
-import { getCategoryIcon } from '../lib/icons';
 
 interface ItemModalProps {
   isOpen: boolean;
@@ -22,7 +21,7 @@ const CATEGORIES: Category[] = [
 export function ItemModal({ isOpen, onClose, onSave, initialData }: ItemModalProps) {
   const { toast } = useUI();
   const [loading, setLoading] = useState(false);
-  const [formData, setFormData] = useState<Partial<Item>>({
+  const [formData, setFormData] = useState<Partial<Item & { currency: string }>>({
     name: '',
     brand: '',
     category: 'Autre',
@@ -88,7 +87,7 @@ export function ItemModal({ isOpen, onClose, onSave, initialData }: ItemModalPro
     }
   };
 
-  const handleChange = (field: keyof Item, value: any) => {
+  const handleChange = (field: keyof (Item & { currency: string }), value: any) => {
     setFormData(prev => ({ ...prev, [field]: value }));
   };
 

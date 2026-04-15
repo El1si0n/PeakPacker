@@ -11,7 +11,7 @@ export function EmptyState({ icon, title, description, action }: EmptyStateProps
   return (
     <div className="flex flex-col items-center justify-center flex-grow py-20 text-[var(--text-muted)] text-center px-4">
       {isValidElement(icon) 
-        ? cloneElement(icon as React.ReactElement, { 
+        ? cloneElement(icon as React.ReactElement<any>, { 
             size: 48, 
             className: "mb-6 opacity-20" 
           }) 
