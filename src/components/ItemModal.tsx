@@ -108,6 +108,7 @@ export function ItemModal({ isOpen, onClose, onSave, initialData }: ItemModalPro
 
           {/* MODAL WINDOW */}
           <motion.div 
+            role="dialog"
             initial={{ opacity: 0, scale: 0.95, y: 20 }}
             animate={{ opacity: 1, scale: 1, y: 0 }}
             exit={{ opacity: 0, scale: 0.95, y: 20 }}
@@ -323,7 +324,7 @@ export function ItemModal({ isOpen, onClose, onSave, initialData }: ItemModalPro
                 disabled={loading}
                 className="w-full flex items-center justify-center gap-2 bg-[var(--color-primary)] text-white font-black text-lg py-4 rounded-2xl hover:brightness-110 active:scale-[0.98] transition-all disabled:opacity-50 shadow-lg shadow-[var(--color-primary)]/20"
               >
-                {loading ? <Loader2 className="animate-spin" size={24} /> : <><Save size={24} />{initialData ? 'Enregistrer les modifications' : 'Ajouter à mon inventaire'}</>}
+                {loading ? <Loader2 className="animate-spin" size={24} /> : <><Save size={24} />{initialData ? 'Enregistrer' : 'Ajouter'}</>}
               </button>
             </div>
           </motion.div>
