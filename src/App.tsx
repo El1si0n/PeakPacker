@@ -24,7 +24,6 @@ function AnimatedRoutes() {
   const minSwipeDistance = 40;
 
   const onTouchStart = (e: React.TouchEvent) => {
-    if (location.pathname === '/bivouac') return;
     if ((e.target as HTMLElement).closest('.leaflet-container, [data-dnd-context], [role="dialog"], input, textarea, select')) return;
     setTouchEnd(null);
     if (e.targetTouches.length === 1) {
@@ -36,7 +35,6 @@ function AnimatedRoutes() {
   };
 
   const onTouchMove = (e: React.TouchEvent) => {
-    if (location.pathname === '/bivouac') return;
     if ((e.target as HTMLElement).closest('.leaflet-container, [data-dnd-context], [role="dialog"], input, textarea, select')) return;
     if (!touchStart) return;
     setTouchEnd({
@@ -45,8 +43,8 @@ function AnimatedRoutes() {
     });
   };
 
-  const onTouchEndEvent = () => {
-    if (location.pathname === '/bivouac') return;
+  const onTouchEndEvent = (e: React.TouchEvent) => {
+    if ((e.target as HTMLElement).closest('.leaflet-container, [data-dnd-context], [role="dialog"], input, textarea, select')) return;
     if (!touchStart || !touchEnd) return;
     
     const distanceX = touchStart.x - touchEnd.x;
