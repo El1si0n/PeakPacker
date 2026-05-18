@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { supabase } from "../lib/supabase";
 import { useAuth } from "../contexts/AuthContext";
 import { useUI } from "../contexts/UIContext";
-import { MapPin, Star, Calendar, Plus, Tent, X, Save, Map, Trash2, Pencil, Sun, Cloud, CloudRain, Snowflake, Wind, Layers, UploadCloud, Check, Loader2, CloudSun } from "lucide-react";
+import { MapPin, Star, Calendar, Plus, Tent, X, Save, Map, Trash2, Pencil, Sun, Cloud, CloudRain, Snowflake, Wind, Layers, UploadCloud, Check, Loader2, CloudSun, Maximize, Minimize } from "lucide-react";
 import { MapContainer, TileLayer, Marker, useMapEvents, useMap, ZoomControl } from "react-leaflet";
 import L from "leaflet";
 import "leaflet/dist/leaflet.css";
@@ -96,6 +96,7 @@ export default function Bivouac() {
   
   const [gpsInput, setGpsInput] = useState("");
   const [mapStyle, setMapStyle] = useState<"voyager" | "satellite" | "topo">("voyager");
+  const [isFullscreen, setIsFullscreen] = useState(false);
   
   const [formData, setFormData] = useState({
     title: "",
@@ -571,7 +572,11 @@ export default function Bivouac() {
         )}
 
         {/* RIGHT: Map Container */}
-        <div className={`z-0 flex-grow min-h-[50dvh] md:min-h-[400px] lg:min-h-[600px] border border-[var(--border-color)] rounded-3xl shadow-sm overflow-hidden relative ${(!activeLogId && !showDrawer) ? 'w-full block' : 'hidden lg:block lg:w-2/3'}`}>
+        <div className={
+          isFullscreen 
+            ? "fixed inset-0 z-[9999] overflow-hidden" 
+            : `z-0 flex-grow min-h-[50dvh] md:min-h-[400px] lg:min-h-[600px] border border-[var(--border-color)] rounded-3xl shadow-sm relative ${(!activeLogId && !showDrawer) ? 'w-full block' : 'hidden lg:block lg:w-2/3'} overflow-hidden`
+        }>
           {/* Subtle map overlay gradient for premium feel */}
           <div className="absolute inset-0 pointer-events-none shadow-[inset_0_0_40px_rgba(0,0,0,0.1)] z-10"></div>
           
@@ -588,13 +593,22 @@ export default function Bivouac() {
             </div>
           </div>
 
-          <button 
-            onClick={() => setMapStyle(mapStyle === "voyager" ? "topo" : mapStyle === "topo" ? "satellite" : "voyager")}
-            className="absolute top-4 right-4 z-[400] bg-[var(--surface-color)]/90 backdrop-blur border border-[var(--border-color)] w-[44px] h-[44px] flex items-center justify-center rounded-full shadow-[0_1px_2px_rgba(0,0,0,0.05)] text-[var(--text-color)] hover:text-[var(--color-primary)] hover:border-[var(--color-primary)] transition-all group"
-            title="Changer de fond de carte"
-          >
-            <Layers size={20} className="group-active:scale-95 transition-transform" />
-          </button>
+          <div className="absolute top-4 right-4 z-[400] flex flex-col gap-3">
+            <button 
+              onClick={() => setIsFullscreen(!isFullscreen)}
+              className="bg-[var(--surface-color)]/90 backdrop-blur border border-[var(--border-color)] w-[44px] h-[44px] flex items-center justify-center rounded-full shadow-[0_1px_2px_rgba(0,0,0,0.05)] text-[var(--text-color)] hover:text-[var(--color-primary)] hover:border-[var(--color-primary)] transition-all group"
+              title={isFullscreen ? "Quitter le plein écran" : "Plein écran"}
+            >
+              {isFullscreen ? <Minimize size={20} className="group-active:scale-95 transition-transform" /> : <Maximize size={20} className="group-active:scale-95 transition-transform" />}
+            </button>
+            <button 
+              onClick={() => setMapStyle(mapStyle === "voyager" ? "topo" : mapStyle === "topo" ? "satellite" : "voyager")}
+              className="bg-[var(--surface-color)]/90 backdrop-blur border border-[var(--border-color)] w-[44px] h-[44px] flex items-center justify-center rounded-full shadow-[0_1px_2px_rgba(0,0,0,0.05)] text-[var(--text-color)] hover:text-[var(--color-primary)] hover:border-[var(--color-primary)] transition-all group"
+              title="Changer de fond de carte"
+            >
+              <Layers size={20} className="group-active:scale-95 transition-transform" />
+            </button>
+          </div>
 
           <MapContainer 
             center={[44.1, 3.1]} // Default map center (France/Alpsish)
@@ -630,7 +644,7 @@ export default function Bivouac() {
                 key={log.id} 
                 position={[log.lat, log.lng]} 
                 icon={createBivouacIcon(activeLogId === log.id)}
-                eventHandlers={{ click: () => handleMarkerClick(log.id) }}
+                eventHandlers={{ click: () => { handleMarkerClick(log.id); setIsFullscreen(false); } }}
               >
                 {/* No default popup since we use the left drawer/sidebar for viewing! */}
               </Marker>
@@ -645,7 +659,7 @@ export default function Bivouac() {
               </Marker>
             )}
             
-            <MapSizeInvalidator isExpanded={!!activeLogId || showDrawer} />
+            <MapSizeInvalidator isExpanded={!!activeLogId || showDrawer || isFullscreen} />
             <MapViewUpdater position={
               draftLocation && showDrawer ? [draftLocation.lat, draftLocation.lng] 
               : activeLogId ? [logs.find(l => l.id === activeLogId)?.lat || 0, logs.find(l => l.id === activeLogId)?.lng || 0] 
