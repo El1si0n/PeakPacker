@@ -46,9 +46,14 @@ function AnimatedRoutes() {
   };
 
   const onTouchEndEvent = () => {
+    if (location.pathname === '/bivouac') return;
     if (!touchStart || !touchEnd) return;
+    
     const distanceX = touchStart.x - touchEnd.x;
     const distanceY = touchStart.y - touchEnd.y;
+
+    setTouchStart(null);
+    setTouchEnd(null);
 
     if (Math.abs(distanceY) > Math.abs(distanceX)) return;
 
