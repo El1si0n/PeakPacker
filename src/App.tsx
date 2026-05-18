@@ -1,4 +1,5 @@
-import { BrowserRouter as Router, Routes, Route, Navigate, useLocation } from "react-router-dom";
+import { BrowserRouter as Router, Routes, Route, Navigate, useLocation, useNavigate } from "react-router-dom";
+import { useState } from "react";
 import { FloatingNav } from "./components/FloatingNav";
 import Inventaire from "./pages/Inventaire";
 import Sac from "./pages/Sac";
@@ -12,20 +13,65 @@ import { Loader2 } from "lucide-react";
 import { AnimatePresence } from "framer-motion";
 import { AnimatedPage } from "./components/AnimatedPage";
 
+const ROUTES = ["/", "/sac", "/checkpoint", "/bivouac", "/radar"];
+
 function AnimatedRoutes() {
   const location = useLocation();
+  const navigate = useNavigate();
+  const [touchStart, setTouchStart] = useState<number | null>(null);
+  const [touchEnd, setTouchEnd] = useState<number | null>(null);
+
+  const minSwipeDistance = 50;
+
+  const onTouchStart = (e: React.TouchEvent) => {
+    if ((e.target as HTMLElement).closest('.leaflet-container, [data-dnd-context], [role="dialog"]')) return;
+    setTouchEnd(null);
+    if (e.targetTouches.length === 1) {
+      setTouchStart(e.targetTouches[0].clientX);
+    }
+  };
+
+  const onTouchMove = (e: React.TouchEvent) => {
+    if ((e.target as HTMLElement).closest('.leaflet-container, [data-dnd-context], [role="dialog"]')) return;
+    setTouchEnd(e.targetTouches[0].clientX);
+  };
+
+  const onTouchEndEvent = () => {
+    if (!touchStart || !touchEnd) return;
+    const distance = touchStart - touchEnd;
+    const isLeftSwipe = distance > minSwipeDistance;
+    const isRightSwipe = distance < -minSwipeDistance;
+
+    if (isLeftSwipe || isRightSwipe) {
+      const currentIndex = ROUTES.indexOf(location.pathname);
+      if (currentIndex === -1) return;
+
+      if (isLeftSwipe && currentIndex < ROUTES.length - 1) {
+        navigate(ROUTES[currentIndex + 1]);
+      } else if (isRightSwipe && currentIndex > 0) {
+        navigate(ROUTES[currentIndex - 1]);
+      }
+    }
+  };
   
   return (
-    <AnimatePresence mode="wait">
-      <Routes location={location} key={location.pathname}>
-        <Route path="/" element={<AnimatedPage><Inventaire /></AnimatedPage>} />
-        <Route path="/sac" element={<AnimatedPage><Sac /></AnimatedPage>} />
-        <Route path="/checkpoint" element={<AnimatedPage><CheckPoint /></AnimatedPage>} />
-        <Route path="/bivouac" element={<AnimatedPage><Bivouac /></AnimatedPage>} />
-        <Route path="/radar" element={<AnimatedPage><Radar /></AnimatedPage>} />
-        <Route path="*" element={<Navigate to="/" replace />} />
-      </Routes>
-    </AnimatePresence>
+    <div 
+      className="flex-1 h-full w-full flex flex-col"
+      onTouchStart={onTouchStart}
+      onTouchMove={onTouchMove}
+      onTouchEnd={onTouchEndEvent}
+    >
+      <AnimatePresence mode="wait">
+        <Routes location={location} key={location.pathname}>
+          <Route path="/" element={<AnimatedPage><Inventaire /></AnimatedPage>} />
+          <Route path="/sac" element={<AnimatedPage><Sac /></AnimatedPage>} />
+          <Route path="/checkpoint" element={<AnimatedPage><CheckPoint /></AnimatedPage>} />
+          <Route path="/bivouac" element={<AnimatedPage><Bivouac /></AnimatedPage>} />
+          <Route path="/radar" element={<AnimatedPage><Radar /></AnimatedPage>} />
+          <Route path="*" element={<Navigate to="/" replace />} />
+        </Routes>
+      </AnimatePresence>
+    </div>
   );
 }
 
