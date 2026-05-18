@@ -18,29 +18,42 @@ const ROUTES = ["/", "/sac", "/checkpoint", "/bivouac", "/radar"];
 function AnimatedRoutes() {
   const location = useLocation();
   const navigate = useNavigate();
-  const [touchStart, setTouchStart] = useState<number | null>(null);
-  const [touchEnd, setTouchEnd] = useState<number | null>(null);
+  const [touchStart, setTouchStart] = useState<{x: number, y: number} | null>(null);
+  const [touchEnd, setTouchEnd] = useState<{x: number, y: number} | null>(null);
 
-  const minSwipeDistance = 50;
+  const minSwipeDistance = 40;
 
   const onTouchStart = (e: React.TouchEvent) => {
-    if ((e.target as HTMLElement).closest('.leaflet-container, [data-dnd-context], [role="dialog"]')) return;
+    if (location.pathname === '/bivouac') return;
+    if ((e.target as HTMLElement).closest('.leaflet-container, [data-dnd-context], [role="dialog"], input, textarea, select')) return;
     setTouchEnd(null);
     if (e.targetTouches.length === 1) {
-      setTouchStart(e.targetTouches[0].clientX);
+      setTouchStart({
+        x: e.targetTouches[0].clientX,
+        y: e.targetTouches[0].clientY
+      });
     }
   };
 
   const onTouchMove = (e: React.TouchEvent) => {
-    if ((e.target as HTMLElement).closest('.leaflet-container, [data-dnd-context], [role="dialog"]')) return;
-    setTouchEnd(e.targetTouches[0].clientX);
+    if (location.pathname === '/bivouac') return;
+    if ((e.target as HTMLElement).closest('.leaflet-container, [data-dnd-context], [role="dialog"], input, textarea, select')) return;
+    if (!touchStart) return;
+    setTouchEnd({
+      x: e.targetTouches[0].clientX,
+      y: e.targetTouches[0].clientY
+    });
   };
 
   const onTouchEndEvent = () => {
     if (!touchStart || !touchEnd) return;
-    const distance = touchStart - touchEnd;
-    const isLeftSwipe = distance > minSwipeDistance;
-    const isRightSwipe = distance < -minSwipeDistance;
+    const distanceX = touchStart.x - touchEnd.x;
+    const distanceY = touchStart.y - touchEnd.y;
+
+    if (Math.abs(distanceY) > Math.abs(distanceX)) return;
+
+    const isLeftSwipe = distanceX > minSwipeDistance;
+    const isRightSwipe = distanceX < -minSwipeDistance;
 
     if (isLeftSwipe || isRightSwipe) {
       const currentIndex = ROUTES.indexOf(location.pathname);
