@@ -317,11 +317,11 @@ export default function Radar() {
           <p className="text-[var(--text-muted)] font-medium">Analyse du radar...</p>
         </div>
       ) : items.length === 0 ? (
-        <EmptyState 
-          icon={<RadarIcon size={40} className="stroke-[1.5]" />}
-          title="Aucune cible repérée"
-          description="Commencez à repérer vos futurs achats ou ajoutez une nouvelle pièce."
-        />
+          <EmptyState 
+            icon={<RadarIcon size={40} className="stroke-[1.5]" />}
+            title="Aucune cible repérée"
+            description="Commencez à repérer vos futurs achats (tente, sac de couchage...). Ajoutez-les ici pour comparer les prix et le poids avant de vous décider !"
+          />
       ) : (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
           <AnimatePresence>

@@ -208,7 +208,7 @@ export default function CheckPoint() {
     if (!user) return;
     const { data } = await supabase
       .from('bags')
-      .select('id, name, icon, bag_items(item:inventory(name))')
+      .select('id, name, icon, bag_items(quantity, item:inventory(name))')
       .eq('user_id', user.id);
     
     if (data) setBags(data);
@@ -306,7 +306,12 @@ export default function CheckPoint() {
     
     let currentTasks = tasks.filter(t => t.category !== "Équipement");
 
-    const bagItemNames: string[] = selectedBag.bag_items.map((bi: any) => bi.item?.name).filter(Boolean);
+    const bagItemNames: string[] = selectedBag.bag_items
+      .filter((bi: any) => bi.item?.name)
+      .map((bi: any) => {
+        const qty = bi.quantity || 1;
+        return qty > 1 ? `${bi.item.name} x${qty}` : bi.item.name;
+      });
     
     if (bagItemNames.length === 0) {
        setTasks(currentTasks);

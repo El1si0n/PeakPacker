@@ -161,17 +161,17 @@ export function UserMenu({ isOpen, onClose }: { isOpen: boolean, onClose: () => 
                   <div className="bg-[var(--surface-color)] border border-[var(--border-color)] p-4 rounded-2xl flex flex-col gap-1 items-center justify-center text-center shadow-sm">
                     <Box size={20} className="text-[var(--color-primary)] mb-1" />
                     <span className="text-xl font-black text-[var(--color-primary)]">{stats.items}</span>
-                    <span className="text-[10px] font-medium text-[var(--text-muted)] uppercase tracking-wider">Items</span>
+                    <span className="text-[10px] font-medium text-[var(--text-muted)] uppercase tracking-wider">{stats.items <= 1 ? 'Item' : 'Items'}</span>
                   </div>
                   <div className="bg-[var(--surface-color)] border border-[var(--border-color)] p-4 rounded-2xl flex flex-col gap-1 items-center justify-center text-center">
                     <Backpack size={20} className="text-[var(--text-muted)] mb-1" />
                     <span className="text-xl font-black text-[var(--text-color)]">{stats.bags}</span>
-                    <span className="text-[10px] font-medium text-[var(--text-muted)] uppercase tracking-wider">Sacs</span>
+                    <span className="text-[10px] font-medium text-[var(--text-muted)] uppercase tracking-wider">{stats.bags <= 1 ? 'Sac' : 'Sacs'}</span>
                   </div>
                   <div className="bg-[var(--surface-color)] border border-[var(--border-color)] p-4 rounded-2xl flex flex-col gap-1 items-center justify-center text-center">
                     <Map size={20} className="text-[var(--text-muted)] mb-1" />
                     <span className="text-xl font-black text-[var(--text-color)]">{stats.bivouacs}</span>
-                    <span className="text-[10px] font-medium text-[var(--text-muted)] uppercase tracking-wider">Nuits</span>
+                    <span className="text-[10px] font-medium text-[var(--text-muted)] uppercase tracking-wider">{stats.bivouacs <= 1 ? 'Nuit' : 'Nuits'}</span>
                   </div>
                 </div>
               </div>

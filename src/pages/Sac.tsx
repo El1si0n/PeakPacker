@@ -389,50 +389,52 @@ export default function Sac() {
   return (
     <div className="pt-8 pb-32 md:pt-28 md:pb-16 px-4 max-w-7xl mx-auto min-h-screen flex flex-col">
       {/* HEADER DETAILED VIEW */}
-      <div className="flex flex-col md:flex-row md:items-start justify-between gap-6 mb-8 border-b border-[var(--border-color)] pb-6">
-        <div className="flex-grow w-full">
+      <div className="flex flex-col gap-4 mb-8 border-b border-[var(--border-color)] pb-6">
+        {/* Top bar: Back button & Actions */}
+        <div className="flex items-center justify-between w-full">
           <button 
             onClick={() => setSelectedConfigId(null)}
-            className="flex items-center gap-2 text-[var(--color-primary)] hover:opacity-80 transition-opacity font-bold mb-4"
+            className="flex items-center gap-2 text-[var(--color-primary)] hover:opacity-80 transition-opacity font-bold"
           >
             <ChevronLeft size={20} />
-            Retour aux configurations
+            Retour <span className="hidden sm:inline">aux configurations</span>
           </button>
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 w-full">
-            <div className="flex items-center gap-3 md:gap-4 flex-grow min-w-0">
-              <IconPicker 
-                currentIcon={activeConfig.icon} 
-                onChange={handleIconUpdate} 
-              />
-              <input 
-                type="text" 
-                value={activeConfig.name}
-                onChange={(e) => {
-                  const newConfigs = [...configs];
-                  newConfigs[activeConfigIndex] = { ...newConfigs[activeConfigIndex], name: e.target.value };
-                  setConfigs(newConfigs);
-                }}
-                onBlur={(e) => handleNameUpdate(e.target.value)}
-                className="text-3xl md:text-5xl font-bold tracking-tight text-[var(--text-color)] bg-transparent border-none outline-none focus:ring-0 p-0 hover:bg-[var(--surface-color)]/50 focus:bg-[var(--surface-color)] rounded-xl transition-colors min-w-0 flex-grow"
-              />
-            </div>
-            <div className="flex items-center gap-2 flex-shrink-0 mt-2 sm:mt-0">
-              <button
-                onClick={handleSharePack}
-                className="text-[var(--text-muted)] hover:text-[var(--color-primary)] hover:bg-[var(--color-primary)]/10 transition-colors p-3 rounded-full cursor-pointer"
-                title="Générer un lien public"
-              >
-                <Share2 size={24} />
-              </button>
-              <button
-                onClick={handleTrashBag}
-                className="text-[var(--text-muted)] hover:text-red-500 hover:bg-red-500/10 transition-colors p-3 rounded-full cursor-pointer"
-                title="Supprimer la configuration"
-              >
-                <Trash2 size={24} />
-              </button>
-            </div>
+          
+          <div className="flex items-center gap-1">
+            <button
+              onClick={handleSharePack}
+              className="text-[var(--text-muted)] hover:text-[var(--color-primary)] hover:bg-[var(--color-primary)]/10 transition-colors p-2 sm:p-3 rounded-full cursor-pointer"
+              title="Générer un lien public"
+            >
+              <Share2 size={20} className="sm:w-6 sm:h-6" />
+            </button>
+            <button
+              onClick={handleTrashBag}
+              className="text-[var(--text-muted)] hover:text-red-500 hover:bg-red-500/10 transition-colors p-2 sm:p-3 rounded-full cursor-pointer"
+              title="Supprimer la configuration"
+            >
+              <Trash2 size={20} className="sm:w-6 sm:h-6" />
+            </button>
           </div>
+        </div>
+
+        {/* Title area */}
+        <div className="flex items-center gap-3 md:gap-4 w-full">
+          <IconPicker 
+            currentIcon={activeConfig.icon} 
+            onChange={handleIconUpdate} 
+          />
+          <input 
+            type="text" 
+            value={activeConfig.name}
+            onChange={(e) => {
+              const newConfigs = [...configs];
+              newConfigs[activeConfigIndex] = { ...newConfigs[activeConfigIndex], name: e.target.value };
+              setConfigs(newConfigs);
+            }}
+            onBlur={(e) => handleNameUpdate(e.target.value)}
+            className="text-3xl md:text-5xl font-bold tracking-tight text-[var(--text-color)] bg-transparent border-none outline-none focus:ring-0 p-0 hover:bg-[var(--surface-color)]/50 focus:bg-[var(--surface-color)] rounded-xl transition-colors min-w-0 flex-grow"
+          />
         </div>
       </div>
 
