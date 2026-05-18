@@ -452,24 +452,24 @@ export default function Bivouac() {
                     />
                   </div>
 
-                  <div className="flex flex-col sm:flex-row gap-4">
-                    <div className="flex flex-col gap-1.5 flex-1">
+                  <div className="flex gap-4">
+                    <div className="flex flex-col gap-1.5 flex-[1.5] min-w-0">
                       <label className="text-xs font-bold uppercase tracking-wider text-[var(--text-muted)] pl-2">Date</label>
                       <input 
                         type="date" 
                         value={formData.date} 
                         onChange={e => setFormData({...formData, date: e.target.value})} 
-                        className="bg-[var(--bg-color)] border border-[var(--border-color)] rounded-2xl px-4 py-3 sm:h-[48px] focus:border-[var(--color-primary)] focus:ring-1 focus:ring-[var(--color-primary)] outline-none transition-all w-full text-[var(--text-color)]" 
+                        className="bg-[var(--bg-color)] border border-[var(--border-color)] rounded-2xl px-3 h-12 focus:border-[var(--color-primary)] focus:ring-1 focus:ring-[var(--color-primary)] outline-none transition-all w-full text-[var(--text-color)] min-w-0 appearance-none text-sm" 
                       />
                     </div>
-                    <div className="flex flex-col gap-1.5 flex-1 sm:flex-[0.5]">
+                    <div className="flex flex-col gap-1.5 flex-1 min-w-0">
                       <label className="text-xs font-bold uppercase tracking-wider text-[var(--text-muted)] pl-2">Note / 5</label>
                       <input 
                         type="number" 
                         min="1" max="5" 
                         value={formData.rating} 
                         onChange={e => setFormData({...formData, rating: parseInt(e.target.value) || 3})} 
-                        className="bg-[var(--bg-color)] border border-[var(--border-color)] rounded-2xl px-4 py-3 sm:h-[48px] focus:border-[var(--color-primary)] focus:ring-1 focus:ring-[var(--color-primary)] outline-none transition-all w-full text-[var(--text-color)]" 
+                        className="bg-[var(--bg-color)] border border-[var(--border-color)] rounded-2xl px-3 h-12 focus:border-[var(--color-primary)] focus:ring-1 focus:ring-[var(--color-primary)] outline-none transition-all w-full text-[var(--text-color)] min-w-0 text-sm" 
                       />
                     </div>
                   </div>
