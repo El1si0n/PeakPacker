@@ -95,7 +95,7 @@ export function ItemModal({ isOpen, onClose, onSave, initialData }: ItemModalPro
   return (
     <AnimatePresence>
       {isOpen && (
-        <div className="fixed inset-0 z-[100] flex items-center justify-center p-0 sm:p-6">
+        <div className="fixed inset-0 z-[100] flex items-center justify-center p-0 sm:p-6" role="dialog" aria-modal="true">
           {/* OVERLAY */}
           <motion.div 
             initial={{ opacity: 0 }}
@@ -108,7 +108,6 @@ export function ItemModal({ isOpen, onClose, onSave, initialData }: ItemModalPro
 
           {/* MODAL WINDOW */}
           <motion.div 
-            role="dialog"
             initial={{ opacity: 0, scale: 0.95, y: 20 }}
             animate={{ opacity: 1, scale: 1, y: 0 }}
             exit={{ opacity: 0, scale: 0.95, y: 20 }}

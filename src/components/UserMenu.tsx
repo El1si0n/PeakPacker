@@ -130,9 +130,10 @@ export function UserMenu({ isOpen, onClose }: { isOpen: boolean, onClose: () => 
           exit={{ opacity: 0 }}
           className="fixed inset-0 z-[9999] flex items-center lg:items-stretch justify-center lg:justify-end p-0 md:p-4 lg:p-0 bg-black/60 backdrop-blur-sm transition-all" 
           onClick={onClose}
+          role="dialog"
+          aria-modal="true"
         >
           <motion.div 
-            role="dialog"
             initial={isMobile ? { opacity: 0, scale: 0.95, y: 20 } : { x: "100%" }}
             animate={isMobile ? { opacity: 1, scale: 1, y: 0 } : { x: 0 }}
             exit={isMobile ? { opacity: 0, scale: 0.95, y: 20 } : { x: "100%" }}
@@ -141,7 +142,7 @@ export function UserMenu({ isOpen, onClose }: { isOpen: boolean, onClose: () => 
             className="w-full h-full md:h-auto max-w-none md:max-w-sm bg-[var(--bg-color)] shadow-2xl rounded-none md:rounded-[2rem] lg:rounded-none lg:rounded-l-[2rem] border-0 md:border border-[var(--border-color)] lg:border-y-0 lg:border-r-0 flex flex-col max-h-[100dvh] md:max-h-[85vh] lg:max-h-none lg:h-full overflow-hidden"
           >
             
-            <div className="flex p-6 md:p-8 flex-col gap-6 flex-grow overflow-y-auto overscroll-y-contain">
+            <div className="flex p-6 md:p-8 flex-col gap-6 flex-grow overflow-y-auto overscroll-contain">
               {/* Header inside scroll is fine, or sticky */}
               <div className="flex items-center justify-between border-b border-[var(--border-color)] pb-4 shrink-0">
                 <h2 className="text-2xl font-bold text-[var(--text-color)] tracking-tight flex items-center gap-3">
