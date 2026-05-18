@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { supabase } from "../lib/supabase";
 import { useAuth } from "../contexts/AuthContext";
 import { useUI } from "../contexts/UIContext";
-import { MapPin, Star, Calendar, Plus, Tent, X, Save, Map, Trash2, Pencil, Sun, Cloud, CloudRain, Snowflake, Wind, Layers, UploadCloud, Check, Loader2 } from "lucide-react";
+import { MapPin, Star, Calendar, Plus, Tent, X, Save, Map, Trash2, Pencil, Sun, Cloud, CloudRain, Snowflake, Wind, Layers, UploadCloud, Check, Loader2, CloudSun } from "lucide-react";
 import { MapContainer, TileLayer, Marker, useMapEvents, useMap, ZoomControl } from "react-leaflet";
 import L from "leaflet";
 import "leaflet/dist/leaflet.css";
@@ -22,6 +22,7 @@ type BivouacLog = {
 
 const WEATHER_ICONS: Record<string, any> = {
   Sun: <Sun size={18} />,
+  CloudSun: <CloudSun size={18} />,
   Cloud: <Cloud size={18} />,
   CloudRain: <CloudRain size={18} />,
   Snowflake: <Snowflake size={18} />,
@@ -451,24 +452,24 @@ export default function Bivouac() {
                     />
                   </div>
 
-                  <div className="flex gap-4">
+                  <div className="flex flex-col sm:flex-row gap-4">
                     <div className="flex flex-col gap-1.5 flex-1">
                       <label className="text-xs font-bold uppercase tracking-wider text-[var(--text-muted)] pl-2">Date</label>
                       <input 
                         type="date" 
                         value={formData.date} 
                         onChange={e => setFormData({...formData, date: e.target.value})} 
-                        className="bg-[var(--bg-color)] border border-[var(--border-color)] rounded-2xl px-4 py-3 focus:border-[var(--color-primary)] focus:ring-1 focus:ring-[var(--color-primary)] outline-none transition-all w-full text-[var(--text-color)]" 
+                        className="bg-[var(--bg-color)] border border-[var(--border-color)] rounded-2xl px-4 py-3 sm:h-[48px] focus:border-[var(--color-primary)] focus:ring-1 focus:ring-[var(--color-primary)] outline-none transition-all w-full text-[var(--text-color)]" 
                       />
                     </div>
-                    <div className="flex flex-col gap-1.5 flex-[0.5]">
+                    <div className="flex flex-col gap-1.5 flex-1 sm:flex-[0.5]">
                       <label className="text-xs font-bold uppercase tracking-wider text-[var(--text-muted)] pl-2">Note / 5</label>
                       <input 
                         type="number" 
                         min="1" max="5" 
                         value={formData.rating} 
                         onChange={e => setFormData({...formData, rating: parseInt(e.target.value) || 3})} 
-                        className="bg-[var(--bg-color)] border border-[var(--border-color)] rounded-2xl px-4 py-3 focus:border-[var(--color-primary)] focus:ring-1 focus:ring-[var(--color-primary)] outline-none transition-all w-full text-[var(--text-color)]" 
+                        className="bg-[var(--bg-color)] border border-[var(--border-color)] rounded-2xl px-4 py-3 sm:h-[48px] focus:border-[var(--color-primary)] focus:ring-1 focus:ring-[var(--color-primary)] outline-none transition-all w-full text-[var(--text-color)]" 
                       />
                     </div>
                   </div>
