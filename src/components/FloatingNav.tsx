@@ -1,10 +1,23 @@
 import { Backpack, Box, CheckSquare, Map, Radar, User } from "lucide-react";
-import { NavLink } from "react-router-dom";
+import { NavLink, useLocation, useNavigate } from "react-router-dom";
 import { useState } from "react";
 import { UserMenu } from "./UserMenu";
 
 export function FloatingNav() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const location = useLocation();
+  const navigate = useNavigate();
+
+  const isUserPageActive = location.pathname === "/mon-espace";
+
+  const handleUserMenuClick = () => {
+    if (window.innerWidth < 768) {
+      navigate("/mon-espace");
+    } else {
+      setIsMenuOpen(true);
+    }
+  };
+
   const navItems = [
     { name: "Inventaire", path: "/", icon: <Box size={24} /> },
     { name: "Sac", path: "/sac", icon: <Backpack size={24} /> },
@@ -57,9 +70,9 @@ export function FloatingNav() {
 
       <div className="flex items-center p-2 rounded-full border border-[var(--border-color)] bg-[var(--bg-color)]/70 backdrop-blur-md shadow-lg transition-all duration-300">
         <button 
-          onClick={() => setIsMenuOpen(true)}
+          onClick={handleUserMenuClick}
           className={`group relative p-3 rounded-full flex items-center justify-center transition-all duration-300 ease-out ${
-            isMenuOpen
+            (isMenuOpen || isUserPageActive)
               ? "bg-[var(--color-primary)] text-white shadow-md shadow-[var(--color-primary)]/20"
               : "text-[var(--text-muted)] hover:text-[var(--text-color)] hover:bg-[var(--surface-color)]"
           }`}
@@ -70,7 +83,7 @@ export function FloatingNav() {
           </span>
           <span
             className={`hidden md:block overflow-hidden whitespace-nowrap transition-all duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] font-medium text-sm ${
-              isMenuOpen
+              (isMenuOpen || isUserPageActive)
                 ? "max-w-[200px] opacity-100 ml-2 mr-1"
                 : "max-w-0 opacity-0 mx-0 group-hover:max-w-[200px] group-hover:opacity-100 group-hover:ml-2 group-hover:mr-1"
             }`}

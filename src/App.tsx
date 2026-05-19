@@ -11,9 +11,10 @@ import SharePack from "./pages/SharePack";
 import { useAuth } from "./contexts/AuthContext";
 import { Loader2 } from "lucide-react";
 import { AnimatePresence } from "framer-motion";
+import { UserMenu } from "./components/UserMenu";
 import { AnimatedPage } from "./components/AnimatedPage";
 
-const ROUTES = ["/", "/sac", "/checkpoint", "/bivouac", "/radar"];
+const ROUTES = ["/", "/sac", "/checkpoint", "/bivouac", "/radar", "/mon-espace"];
 
 function AnimatedRoutes() {
   const location = useLocation();
@@ -84,6 +85,7 @@ function AnimatedRoutes() {
           <Route path="/checkpoint" element={<AnimatedPage><CheckPoint /></AnimatedPage>} />
           <Route path="/bivouac" element={<AnimatedPage><Bivouac /></AnimatedPage>} />
           <Route path="/radar" element={<AnimatedPage><Radar /></AnimatedPage>} />
+          <Route path="/mon-espace" element={<UserMenu isOpen={true} onClose={() => window.history.length > 1 ? navigate(-1) : navigate("/")} />} />
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
       </AnimatePresence>
