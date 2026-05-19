@@ -14,7 +14,7 @@ import { AnimatePresence } from "framer-motion";
 import { UserMenu } from "./components/UserMenu";
 import { AnimatedPage } from "./components/AnimatedPage";
 
-const ROUTES = ["/", "/sac", "/checkpoint", "/bivouac", "/radar", "/mon-espace"];
+const ROUTES = ["/", "/sac", "/checkpoint", "/bivouac", "/radar"];
 
 function AnimatedRoutes() {
   const location = useLocation();
