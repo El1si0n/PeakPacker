@@ -328,7 +328,7 @@ export default function Bivouac() {
             >
               
               {activeLogId && (
-                <div className={`bg-[var(--surface-color)] border border-[var(--border-color)] shadow-xl flex flex-col mx-0 overflow-y-auto [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none] ${isFullscreen ? 'rounded-t-[2rem] rounded-b-none border-b-0 max-h-[85vh] lg:rounded-[2rem] lg:border-b lg:h-full lg:max-h-none' : 'rounded-[2rem] max-h-[80vh]'}`}>
+                <div className={`bg-[var(--surface-color)] border border-[var(--border-color)] shadow-xl flex flex-col mx-0 overflow-y-auto [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none] ${isFullscreen ? 'rounded-t-[2rem] rounded-b-none border-b-0 max-h-[85vh] lg:rounded-[2rem] lg:border-b lg:max-h-[calc(100vh-2rem)]' : 'rounded-[2rem] max-h-[80vh]'}`}>
                 {/* Image header if available */}
                 {logs.find(l => l.id === activeLogId)?.image_url ? (
                   <div className="h-48 relative w-full flex-shrink-0">
@@ -413,7 +413,7 @@ export default function Bivouac() {
             )}
 
               {showDrawer && !activeLogId && (
-                <div className={`bg-[var(--surface-color)] border border-[var(--border-color)] p-6 shadow-xl flex flex-col mx-0 overflow-y-auto [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none] ${isFullscreen ? 'rounded-t-[2rem] rounded-b-none border-b-0 max-h-[85vh] lg:rounded-[2rem] lg:border-b lg:h-full lg:max-h-none' : 'rounded-3xl md:rounded-[2rem] max-h-[80vh] lg:max-h-none'}`}>
+                <div className={`bg-[var(--surface-color)] border border-[var(--border-color)] p-6 shadow-xl flex flex-col mx-0 overflow-y-auto [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none] ${isFullscreen ? 'rounded-t-[2rem] rounded-b-none border-b-0 max-h-[85vh] lg:rounded-[2rem] lg:border-b lg:max-h-[calc(100vh-2rem)]' : 'rounded-3xl md:rounded-[2rem] max-h-[80vh] lg:max-h-none'}`}>
                 <div className="flex items-center justify-between mb-6 pb-4 border-b border-[var(--border-color)] flex-shrink-0">
                   <h2 className="text-2xl font-bold text-[var(--text-color)] tracking-tight flex items-center gap-3">
                     <Tent size={28} className="text-[var(--color-primary)]" />
