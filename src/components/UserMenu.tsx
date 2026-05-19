@@ -134,9 +134,9 @@ export function UserMenu({ isOpen, onClose }: { isOpen: boolean, onClose: () => 
           aria-modal="true"
         >
           <motion.div 
-            initial={isMobile ? { opacity: 0, scale: 0.95, y: 20 } : { x: "100%" }}
-            animate={isMobile ? { opacity: 1, scale: 1, y: 0 } : { x: 0 }}
-            exit={isMobile ? { opacity: 0, scale: 0.95, y: 20 } : { x: "100%" }}
+            initial={isMobile ? { opacity: 1 } : { x: "100%" }}
+            animate={isMobile ? { opacity: 1 } : { x: 0 }}
+            exit={isMobile ? { opacity: 1 } : { x: "100%" }}
             transition={{ type: "tween", duration: 0.25, ease: "easeOut" }}
             onClick={(e) => e.stopPropagation()} 
             className="w-full h-full md:h-auto max-w-none md:max-w-sm bg-[var(--bg-color)] shadow-2xl rounded-none md:rounded-[2rem] lg:rounded-none lg:rounded-l-[2rem] border-0 md:border border-[var(--border-color)] lg:border-y-0 lg:border-r-0 flex flex-col max-h-[100dvh] md:max-h-[85vh] lg:max-h-none lg:h-full overflow-hidden"

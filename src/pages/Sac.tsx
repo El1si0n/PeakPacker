@@ -204,7 +204,7 @@ export default function Sac() {
           {/* Nouveau */}
           <div 
             onClick={handleCreateBag}
-            className="bg-transparent border-2 border-dashed border-[var(--color-primary)]/50 rounded-3xl p-6 sm:p-8 flex flex-[0_0_auto] sm:flex-col items-center sm:justify-center cursor-pointer hover:bg-[var(--color-primary)]/5 transition-all text-[var(--color-primary)] h-auto min-h-[120px] sm:h-[240px] group gap-4 sm:gap-0"
+            className="bg-transparent border-2 border-dashed border-[var(--color-primary)]/50 rounded-3xl p-4 sm:p-8 flex flex-[0_0_auto] sm:flex-col items-center sm:justify-center cursor-pointer hover:bg-[var(--color-primary)]/5 transition-all text-[var(--color-primary)] h-auto min-h-[80px] sm:min-h-[140px] sm:h-[240px] group gap-4 sm:gap-0"
           >
             <div className="w-12 h-12 flex-shrink-0 sm:w-16 sm:h-16 rounded-full bg-[var(--color-primary)]/10 flex items-center justify-center sm:mb-4 group-hover:scale-110 transition-transform">
               <Plus size={24} className="sm:hidden" />

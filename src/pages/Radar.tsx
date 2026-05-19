@@ -271,7 +271,7 @@ export default function Radar() {
           <div className="flex items-center gap-3 mb-2">
             <RadarIcon className="text-[var(--color-primary)] w-10 h-10 flex-shrink-0" />
             <h1 className="text-4xl md:text-5xl font-bold tracking-tight text-[var(--text-color)]">
-              Radar
+              Achats
             </h1>
           </div>
           <p className="text-[var(--text-muted)] text-lg">

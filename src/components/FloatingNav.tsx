@@ -10,7 +10,7 @@ export function FloatingNav() {
     { name: "Sac", path: "/sac", icon: <Backpack size={24} /> },
     { name: "Check-list", path: "/checkpoint", icon: <CheckSquare size={24} /> },
     { name: "Bivouac", path: "/bivouac", icon: <Map size={24} /> },
-    { name: "Radar", path: "/radar", icon: <Radar size={24} /> },
+    { name: "Achats", path: "/radar", icon: <Radar size={24} /> },
   ];
 
   return (

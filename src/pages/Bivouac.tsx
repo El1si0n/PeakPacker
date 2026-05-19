@@ -276,10 +276,10 @@ export default function Bivouac() {
       {/* HEADER */}
       <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-8 flex-shrink-0">
         <div className="flex flex-col items-start">
-          <div className="flex items-center gap-3 mb-3 pt-1">
+          <div className="flex items-center gap-3 mb-2">
             <Map className="text-[var(--color-primary)] w-10 h-10 flex-shrink-0" />
-            <h1 className="text-4xl md:text-5xl font-bold tracking-tight text-[var(--text-color)] pb-1">
-              Carnet de Bivouac
+            <h1 className="text-4xl md:text-5xl font-bold tracking-tight text-[var(--text-color)]">
+              Bivouac
             </h1>
           </div>
           <p className="text-[var(--text-muted)] text-lg flex items-center gap-2">
@@ -306,7 +306,11 @@ export default function Bivouac() {
         
         {/* LEFT/BOTTOM: Drawer / Log Info */}
         {(activeLogId || showDrawer) && (
-          <div className="w-full lg:w-1/3 flex flex-col gap-6 lg:static z-40 bg-[var(--bg-color)] lg:bg-transparent p-0 lg:p-0">
+          <div className={
+            isFullscreen 
+              ? "fixed bottom-4 left-4 right-4 lg:bottom-auto lg:top-4 lg:w-1/3 z-[10000] max-h-[70vh] lg:max-h-[calc(100vh-2rem)] overflow-y-auto flex flex-col gap-6 shadow-2xl rounded-[2rem]" 
+              : "w-full lg:w-1/3 flex flex-col gap-6 lg:static z-40 bg-[var(--bg-color)] lg:bg-transparent p-0 lg:p-0"
+          }>
             
             {activeLogId && (
               <div className="bg-[var(--surface-color)] border border-[var(--border-color)] rounded-[2rem] shadow-xl flex flex-col mx-0 max-h-[80vh] overflow-y-auto">
@@ -644,7 +648,7 @@ export default function Bivouac() {
                 key={log.id} 
                 position={[log.lat, log.lng]} 
                 icon={createBivouacIcon(activeLogId === log.id)}
-                eventHandlers={{ click: () => { handleMarkerClick(log.id); setIsFullscreen(false); } }}
+                eventHandlers={{ click: () => { handleMarkerClick(log.id); } }}
               >
                 {/* No default popup since we use the left drawer/sidebar for viewing! */}
               </Marker>
