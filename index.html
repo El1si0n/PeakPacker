@@ -1,46 +1,46 @@
 <!doctype html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-    <meta name="format-detection" content="telephone=no, date=no, email=no, address=no" />
-    <meta name="theme-color" id="theme-color-meta" content="#ffffff" />
-    <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    
-    <!-- SEO Standard -->
-    <title>Crée ton propre sac — PeakPacker</title>
-    <meta name="description" content="PeakPacker est l'application pour les randonneurs qui permet de gérer ton inventaire, configurer tes sacs, et bien plus encore comme organiser ton bivouac." />
 
-    <!-- Open Graph / Facebook / Discord / Slack -->
-    <meta property="og:type" content="website" />
-    <meta property="og:url" content="https://peakpacker.vercel.app/" />
-    <meta property="og:title" content="Crée ton propre sac — PeakPacker" />
-    <meta property="og:description" content="PeakPacker est l'application pour les randonneurs qui permet de gérer ton inventaire, configurer tes sacs, et bien plus encore comme organiser ton bivouac." />
-    <meta property="og:image" content="https://peakpacker.vercel.app/og-image.png" />
+<head>
+  <meta charset="UTF-8" />
+  <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <meta name="format-detection" content="telephone=no, date=no, email=no, address=no" />
+  <meta name="theme-color" id="theme-color-meta" content="#ffffff" />
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 
-    <!-- Twitter / X -->
-    <meta property="twitter:card" content="summary_large_image" />
-    <meta property="twitter:url" content="https://peakpacker.vercel.app/" />
-    <meta property="twitter:title" content="Crée ton propre sac — PeakPacker" />
-    <meta property="twitter:description" content="PeakPacker est l'application pour les randonneurs qui permet de gérer ton inventaire, configurer tes sacs, et bien plus encore comme organiser ton bivouac." />
-    <meta property="twitter:image" content="https://peakpacker.vercel.app/og-image.png" />
-  </head>
-  <body>
-    <script>
-      (function() {
-        try {
-          var savedTheme = localStorage.getItem("peakpacker-theme");
-          if (!savedTheme) {
-            savedTheme = window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light";
-          }
-          document.documentElement.setAttribute("data-theme", savedTheme);
-          document.getElementById("theme-color-meta").setAttribute("content", savedTheme === "dark" ? "#0a0a0a" : "#ffffff");
-        } catch (e) {}
-      })();
-    </script>
-    <div id="root"></div>
-    <script type="module" src="/src/main.tsx"></script>
-  </body>
+  <!-- SEO Standard -->
+  <title>PeakPacker</title>
+
+  <!-- Open Graph / Facebook / Discord / Slack -->
+  <meta property="og:type" content="website" />
+  <meta property="og:url" content="https://peakpacker.vercel.app/" />
+  <meta property="og:title" content="PeakPacker" />
+  <meta property="og:image" content="https://peakpacker.vercel.app/og-image.png" />
+
+  <!-- Twitter / X -->
+  <meta property="twitter:card" content="summary_large_image" />
+  <meta property="twitter:url" content="https://peakpacker.vercel.app/" />
+  <meta property="twitter:title" content="PeakPacker" />
+  <meta property="twitter:image" content="https://peakpacker.vercel.app/og-image.png" />
+</head>
+
+<body>
+  <script>
+    (function () {
+      try {
+        var savedTheme = localStorage.getItem("peakpacker-theme");
+        if (!savedTheme) {
+          savedTheme = window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light";
+        }
+        document.documentElement.setAttribute("data-theme", savedTheme);
+        document.getElementById("theme-color-meta").setAttribute("content", savedTheme === "dark" ? "#0a0a0a" : "#ffffff");
+      } catch (e) { }
+    })();
+  </script>
+  <div id="root"></div>
+  <script type="module" src="/src/main.tsx"></script>
+</body>
+
 </html>
