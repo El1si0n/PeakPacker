@@ -63,9 +63,9 @@ function AnimatedRoutes() {
       if (currentIndex === -1) return;
 
       if (isLeftSwipe && currentIndex < ROUTES.length - 1) {
-        navigate(ROUTES[currentIndex + 1]);
+        navigate(ROUTES[currentIndex + 1], { state: { direction: 'left' } });
       } else if (isRightSwipe && currentIndex > 0) {
-        navigate(ROUTES[currentIndex - 1]);
+        navigate(ROUTES[currentIndex - 1], { state: { direction: 'right' } });
       }
     }
   };

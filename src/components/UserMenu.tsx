@@ -128,7 +128,7 @@ export function UserMenu({ isOpen, onClose }: { isOpen: boolean, onClose: () => 
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
-          className="fixed inset-0 z-[9999] flex items-center lg:items-stretch justify-center lg:justify-end p-0 md:p-4 lg:p-0 bg-black/60 backdrop-blur-sm transition-all" 
+          className="fixed inset-0 z-[9999] flex items-center lg:items-stretch justify-center lg:justify-end p-0 md:p-4 lg:p-0 bg-[var(--bg-color)] md:bg-black/60 md:backdrop-blur-sm transition-all" 
           onClick={onClose}
           role="dialog"
           aria-modal="true"
@@ -139,7 +139,7 @@ export function UserMenu({ isOpen, onClose }: { isOpen: boolean, onClose: () => 
             exit={isMobile ? { opacity: 1 } : { x: "100%" }}
             transition={{ type: "tween", duration: 0.25, ease: "easeOut" }}
             onClick={(e) => e.stopPropagation()} 
-            className="w-full h-full md:h-auto max-w-none md:max-w-sm bg-[var(--bg-color)] shadow-2xl rounded-none md:rounded-[2rem] lg:rounded-none lg:rounded-l-[2rem] border-0 md:border border-[var(--border-color)] lg:border-y-0 lg:border-r-0 flex flex-col max-h-[100dvh] md:max-h-[85vh] lg:max-h-none lg:h-full overflow-hidden"
+            className="w-full h-full md:h-auto max-w-none md:max-w-sm bg-[var(--bg-color)] md:shadow-2xl rounded-none md:rounded-[2rem] lg:rounded-none lg:rounded-l-[2rem] border-0 md:border border-[var(--border-color)] lg:border-y-0 lg:border-r-0 flex flex-col max-h-[100dvh] md:max-h-[85vh] lg:max-h-none lg:h-full overflow-hidden"
           >
             
             <div className="flex p-6 md:p-8 flex-col gap-6 flex-grow overflow-y-auto overscroll-contain">
