@@ -98,6 +98,13 @@ export default function Bivouac() {
   const [gpsInput, setGpsInput] = useState("");
   const [mapStyle, setMapStyle] = useState<"voyager" | "satellite" | "topo">("voyager");
   const [isFullscreen, setIsFullscreen] = useState(false);
+  const [isDesktop, setIsDesktop] = useState(window.innerWidth >= 1024);
+
+  useEffect(() => {
+    const handleResize = () => setIsDesktop(window.innerWidth >= 1024);
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
   
   const [formData, setFormData] = useState({
     title: "",
@@ -309,19 +316,19 @@ export default function Bivouac() {
         <AnimatePresence>
           {(activeLogId || showDrawer) && (
             <motion.div 
-              initial={isFullscreen ? { y: "100%", opacity: 0 } : { opacity: 0 }}
-              animate={isFullscreen ? { y: 0, opacity: 1 } : { opacity: 1 }}
-              exit={isFullscreen ? { y: "100%", opacity: 0 } : { opacity: 0 }}
+              initial={(isFullscreen && !isDesktop) ? { y: "100%", opacity: 0 } : { opacity: 0 }}
+              animate={(isFullscreen && !isDesktop) ? { y: 0, opacity: 1 } : { opacity: 1 }}
+              exit={(isFullscreen && !isDesktop) ? { y: "100%", opacity: 0 } : { opacity: 0 }}
               transition={{ type: "spring", damping: 25, stiffness: 200 }}
               className={
                 isFullscreen 
-                  ? "fixed bottom-0 left-0 right-0 lg:left-4 lg:bottom-auto lg:top-4 lg:w-[400px] z-[10000] flex flex-col gap-6" 
+                  ? "fixed bottom-0 left-0 right-0 lg:left-4 lg:bottom-4 lg:top-4 lg:w-[400px] z-[10000] flex flex-col gap-6" 
                   : "w-full lg:w-[400px] flex-shrink-0 flex flex-col gap-6 lg:static z-40 bg-[var(--bg-color)] lg:bg-transparent p-0 lg:p-0"
               }
             >
               
               {activeLogId && (
-                <div className={`bg-[var(--surface-color)] border border-[var(--border-color)] shadow-xl flex flex-col mx-0 overflow-y-auto [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none] ${isFullscreen ? 'rounded-t-[2rem] rounded-b-none border-b-0 max-h-[85vh] lg:rounded-[2rem] lg:border-b' : 'rounded-[2rem] max-h-[80vh]'}`}>
+                <div className={`bg-[var(--surface-color)] border border-[var(--border-color)] shadow-xl flex flex-col mx-0 overflow-y-auto [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none] ${isFullscreen ? 'rounded-t-[2rem] rounded-b-none border-b-0 max-h-[85vh] lg:rounded-[2rem] lg:border-b lg:h-full lg:max-h-none' : 'rounded-[2rem] max-h-[80vh]'}`}>
                 {/* Image header if available */}
                 {logs.find(l => l.id === activeLogId)?.image_url ? (
                   <div className="h-48 relative w-full flex-shrink-0">
@@ -406,7 +413,7 @@ export default function Bivouac() {
             )}
 
               {showDrawer && !activeLogId && (
-                <div className={`bg-[var(--surface-color)] border border-[var(--border-color)] p-6 shadow-xl flex flex-col mx-0 overflow-y-auto [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none] ${isFullscreen ? 'rounded-t-[2rem] rounded-b-none border-b-0 max-h-[85vh] lg:rounded-[2rem] lg:border-b' : 'rounded-3xl md:rounded-[2rem] max-h-[80vh] lg:max-h-none'}`}>
+                <div className={`bg-[var(--surface-color)] border border-[var(--border-color)] p-6 shadow-xl flex flex-col mx-0 overflow-y-auto [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none] ${isFullscreen ? 'rounded-t-[2rem] rounded-b-none border-b-0 max-h-[85vh] lg:rounded-[2rem] lg:border-b lg:h-full lg:max-h-none' : 'rounded-3xl md:rounded-[2rem] max-h-[80vh] lg:max-h-none'}`}>
                 <div className="flex items-center justify-between mb-6 pb-4 border-b border-[var(--border-color)] flex-shrink-0">
                   <h2 className="text-2xl font-bold text-[var(--text-color)] tracking-tight flex items-center gap-3">
                     <Tent size={28} className="text-[var(--color-primary)]" />
