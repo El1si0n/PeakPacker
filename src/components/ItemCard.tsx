@@ -1,9 +1,9 @@
-import { ExternalLink, Edit2, Trash2, Weight, Tag } from "lucide-react";
+import { ExternalLink, Edit2, Trash2, Weight, Tag, CheckCircle2 } from "lucide-react";
 import type { Item } from "../types";
 import { BrandBadge } from "./BrandBadge";
 import { getCategoryIcon } from "../lib/icons";
 
-export function ItemCard({ item, onEdit, onDelete }: { item: Item, onEdit?: () => void, onDelete?: () => void }) {
+export function ItemCard({ item, onEdit, onDelete, onBuy }: { item: Item, onEdit?: () => void, onDelete?: () => void, onBuy?: () => void }) {
   return (
     <div className="group flex flex-col bg-[var(--bg-color)] border border-[var(--border-color)] rounded-[16px] overflow-hidden hover:border-[var(--color-primary)]/40 hover:shadow-lg hover:-translate-y-1 transition-all duration-300 ease-out">
       {/* Image container */}
@@ -55,7 +55,7 @@ export function ItemCard({ item, onEdit, onDelete }: { item: Item, onEdit?: () =
       <div className="p-5 flex flex-col flex-grow">
         <div className="flex justify-between items-start gap-2 mb-4">
           {item.url ? (
-            <a href={item.url} target="_blank" rel="noreferrer" className="font-semibold text-lg leading-snug tracking-tight text-[var(--text-color)] hover:text-[var(--color-primary)] transition-colors">
+            <a href={item.url} target="_blank" rel="noreferrer" className="font-semibold text-lg leading-snug tracking-tight text-[var(--text-color)] hover:text-[var(--color-primary)] transition-colors underline decoration-[var(--border-color)] hover:decoration-[var(--color-primary)] underline-offset-4">
               {item.name}
             </a>
           ) : (
@@ -69,16 +69,28 @@ export function ItemCard({ item, onEdit, onDelete }: { item: Item, onEdit?: () =
         </div>
 
         {/* Footer actions / metrics */}
-        <div className="mt-auto pt-4 border-t border-[var(--border-color)] flex items-center justify-start gap-4 text-sm">
-          <div className="flex items-center gap-1.5 font-semibold text-[var(--text-color)]">
-            <Weight size={16} className="text-[var(--color-primary)]" />
-            <span>{item.weight} <span className="text-[var(--text-muted)] font-normal">g</span></span>
-          </div>
-          {item.price && (
-            <div className="flex items-center gap-1.5 text-[var(--text-color)] font-medium">
-              <Tag size={16} className="text-[var(--text-muted)]" />
-              <span>{item.price} <span className="text-[var(--text-muted)] font-normal">€</span></span>
+        <div className="mt-auto pt-4 border-t border-[var(--border-color)] flex items-center justify-between gap-4 text-sm">
+          <div className="flex items-center gap-4 flex-wrap">
+            <div className="flex items-center gap-1.5 font-semibold text-[var(--text-color)]">
+              <Weight size={16} className="text-[var(--color-primary)]" />
+              <span>{item.weight} <span className="text-[var(--text-muted)] font-normal">g</span></span>
             </div>
+            {(item.price ?? 0) > 0 && (
+              <div className="flex items-center gap-1.5 text-[var(--text-color)] font-medium">
+                <Tag size={16} className="text-[var(--text-muted)]" />
+                <span>{item.price} <span className="text-[var(--text-muted)] font-normal">€</span></span>
+              </div>
+            )}
+          </div>
+
+          {onBuy && (
+            <button 
+              onClick={onBuy} 
+              className="flex items-center gap-1.5 bg-[var(--color-primary)] text-white px-3 py-1.5 rounded-[10px] text-[13px] font-bold hover:brightness-110 shadow-sm active:scale-95 transition-all flex-shrink-0"
+            >
+              <CheckCircle2 size={14} /> 
+              <span>Acheté</span>
+            </button>
           )}
         </div>
       </div>
