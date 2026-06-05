@@ -256,6 +256,7 @@ export default function Inventaire() {
           </div>
           <p className="text-[var(--text-muted)] text-lg">
             Votre base de données d'équipements personnelle.
+          </p>
         </div>
         
         <div className="flex items-center gap-4 flex-shrink-0">

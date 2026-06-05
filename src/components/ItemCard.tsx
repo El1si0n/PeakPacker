@@ -1,4 +1,4 @@
-import { ExternalLink, Edit2, Trash2, Weight, Tag } from "lucide-react";
+import { ExternalLink, Trash2, Weight, Tag } from "lucide-react";
 import type { Item } from "../types";
 import { BrandBadge } from "./BrandBadge";
 import { getCategoryIcon } from "../lib/icons";
