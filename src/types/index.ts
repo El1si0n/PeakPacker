@@ -4,9 +4,11 @@ export type Category =
   | "Sac"
   | "Vêtements"
   | "Cuisine"
+  | "Hydratation"
   | "Nourriture"
   | "Électronique"
-  | "Hygiène/Secours"
+  | "Hygiène"
+  | "Secours"
   | "Accessoires"
   | "Autre";
 

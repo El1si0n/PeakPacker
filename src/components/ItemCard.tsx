@@ -7,7 +7,10 @@ export function ItemCard({ item, onEdit, onDelete }: { item: Item, onEdit?: () =
   return (
     <div className="group flex flex-col bg-[var(--bg-color)] border border-[var(--border-color)] rounded-[16px] overflow-hidden hover:border-[var(--color-primary)]/40 hover:shadow-lg hover:-translate-y-1 transition-all duration-300 ease-out">
       {/* Image container */}
-      <div className="h-48 bg-[var(--surface-color)] relative flex items-center justify-center overflow-hidden">
+      <div 
+        className={`h-48 bg-[var(--surface-color)] relative flex items-center justify-center overflow-hidden ${onEdit ? 'cursor-pointer' : ''}`}
+        onClick={onEdit}
+      >
         {item.image_url ? (
           <img src={item.image_url} alt={item.name} className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" />
         ) : (
@@ -17,10 +20,9 @@ export function ItemCard({ item, onEdit, onDelete }: { item: Item, onEdit?: () =
         )}
         
         {/* Badge catégorie en haut à gauche */}
-        <div className="absolute top-3 left-3 flex gap-2 z-10">
-          <span className="bg-[var(--bg-color)]/90 backdrop-blur-md text-[var(--text-color)] text-xs font-semibold px-3 py-1.5 rounded-full border border-[var(--border-color)] shadow-sm flex items-center gap-1.5">
+        <div className="absolute top-3 left-3 flex gap-2 z-10" title={item.category}>
+          <span className="bg-[var(--bg-color)]/90 backdrop-blur-md text-[var(--text-color)] text-xs font-semibold p-1.5 rounded-full border border-[var(--border-color)] shadow-sm flex items-center justify-center">
             {getCategoryIcon(item.category)}
-            {item.category}
           </span>
         </div>
 
@@ -35,14 +37,7 @@ export function ItemCard({ item, onEdit, onDelete }: { item: Item, onEdit?: () =
             </span>
           )}
           <button 
-            onClick={onEdit}
-            className="p-1.5 bg-[var(--bg-color)]/90 backdrop-blur-md rounded-full text-[var(--text-color)] hover:text-[var(--color-primary)] hover:border-[var(--color-primary)] transition-all shadow-sm border border-[var(--border-color)]"
-            title="Modifier"
-          >
-            <Edit2 size={16} />
-          </button>
-          <button 
-            onClick={onDelete}
+            onClick={(e) => { e.stopPropagation(); onDelete?.(); }}
             className="p-1.5 bg-[var(--bg-color)]/90 backdrop-blur-md rounded-full text-[var(--text-color)] hover:text-red-500 hover:border-red-500 transition-all shadow-sm border border-[var(--border-color)] cursor-pointer relative z-10"
             title="Supprimer"
           >
@@ -54,9 +49,15 @@ export function ItemCard({ item, onEdit, onDelete }: { item: Item, onEdit?: () =
       {/* Content */}
       <div className="p-5 flex flex-col flex-grow">
         <div className="flex justify-between items-start gap-2 mb-4">
-          <h3 className="font-semibold text-lg leading-snug tracking-tight text-[var(--text-color)]">{item.name}</h3>
+          {item.url ? (
+            <a href={item.url} target="_blank" rel="noreferrer" className="font-semibold text-lg leading-snug tracking-tight text-[var(--text-color)] hover:text-[var(--color-primary)] transition-colors hover:underline">
+              {item.name}
+            </a>
+          ) : (
+            <h3 className="font-semibold text-lg leading-snug tracking-tight text-[var(--text-color)]">{item.name}</h3>
+          )}
           {item.url && (
-            <a href={item.url} target="_blank" rel="noreferrer" className="text-[var(--text-muted)] hover:text-[var(--color-primary)] transition-colors mt-1">
+            <a href={item.url} target="_blank" rel="noreferrer" className="text-[var(--text-muted)] hover:text-[var(--color-primary)] transition-colors mt-1 flex-shrink-0">
               <ExternalLink size={16} />
             </a>
           )}

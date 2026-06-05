@@ -14,7 +14,7 @@ import { BAG_ICONS, getBagIcon } from "../lib/bagIcons";
 
 const CATEGORIES: Category[] = [
   "Sac", "Abri", "Couchage", "Vêtements", "Cuisine", 
-  "Nourriture", "Hygiène/Secours", "Électronique", "Accessoires", "Autre"
+  "Hydratation", "Nourriture", "Électronique", "Hygiène", "Secours", "Accessoires", "Autre"
 ];
 
 const COLORS = ['#FF5A00', '#3B82F6', '#10B981', '#8B5CF6', '#EC4899', '#F59E0B', '#64748B'];
@@ -397,7 +397,7 @@ export default function Sac() {
             className="flex items-center gap-2 text-[var(--color-primary)] hover:opacity-80 transition-opacity font-bold"
           >
             <ChevronLeft size={20} />
-            Retour <span className="hidden sm:inline">aux configurations</span>
+            Retour
           </button>
           
           <div className="flex items-center gap-1">
