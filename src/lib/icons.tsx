@@ -1,4 +1,4 @@
-import { Tent, BedDouble, Backpack, Shirt, Utensils, Apple, Smartphone, Stethoscope, Compass, Pickaxe, Droplets, Bath, Cross } from "lucide-react";
+import { Tent, BedDouble, Backpack, Shirt, Utensils, Apple, Smartphone, Compass, Pickaxe, Droplets, Bath, Cross } from "lucide-react";
 
 export const getCategoryIcon = (category: string, className?: string) => {
   const defaultClass = className || "text-[var(--text-color)]";

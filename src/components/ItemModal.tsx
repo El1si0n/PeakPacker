@@ -15,7 +15,7 @@ interface ItemModalProps {
 
 const CATEGORIES: Category[] = [
   "Sac", "Abri", "Couchage", "Vêtements", "Cuisine", 
-  "Nourriture", "Hygiène/Secours", "Électronique", "Accessoires", "Autre"
+  "Nourriture", "Hydratation", "Hygiène", "Secours", "Électronique", "Accessoires", "Autre"
 ];
 
 export function ItemModal({ isOpen, onClose, onSave, initialData }: ItemModalProps) {
