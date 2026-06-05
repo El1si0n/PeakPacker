@@ -11,7 +11,7 @@ import { useUI } from "../contexts/UIContext";
 
 const CATEGORIES: Category[] = [
   "Sac", "Abri", "Couchage", "Vêtements", "Cuisine", 
-  "Hydratation", "Nourriture", "Électronique", "Hygiène", "Secours", "Accessoires", "Autre"
+  "Nourriture", "Hydratation", "Hygiène", "Secours", "Électronique", "Accessoires", "Autre"
 ];
 
 export default function Inventaire() {
@@ -258,16 +258,13 @@ export default function Inventaire() {
             Votre base de données d'équipements personnelle.
           </p>
         </div>
-        
-        <div className="flex items-center gap-4 flex-shrink-0">
-          {filteredItems.length > 0 && (
-            <div className="hidden md:flex flex-col items-end">
-              <span className="text-xs font-bold uppercase tracking-wider text-[var(--text-muted)]">Valeur Totale</span>
-              <span className="text-2xl font-black text-[var(--text-color)]">
-                {filteredItems.reduce((sum, item) => sum + ((item.price || 0) * (item.quantity || 1)), 0).toFixed(0)} €
-              </span>
-            </div>
-          )}
+        <div className="flex items-center gap-6 bg-[var(--surface-color)] p-4 rounded-2xl border border-[var(--border-color)]">
+          <div className="flex flex-col">
+            <span className="text-sm font-semibold text-[var(--text-muted)] uppercase tracking-wider">Valeur totale</span>
+            <span className="text-2xl font-bold text-[var(--text-color)]">
+              {filteredItems.reduce((sum, item) => sum + (item.price || 0) * (item.quantity || 1), 0).toFixed(0)} €
+            </span>
+          </div>
         </div>
       </div>
 

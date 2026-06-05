@@ -14,7 +14,7 @@ import { BAG_ICONS, getBagIcon } from "../lib/bagIcons";
 
 const CATEGORIES: Category[] = [
   "Sac", "Abri", "Couchage", "Vêtements", "Cuisine", 
-  "Hydratation", "Nourriture", "Électronique", "Hygiène", "Secours", "Accessoires", "Autre"
+  "Nourriture", "Hydratation", "Hygiène", "Secours", "Électronique", "Accessoires", "Autre"
 ];
 
 const COLORS = ['#FF5A00', '#3B82F6', '#10B981', '#8B5CF6', '#EC4899', '#F59E0B', '#64748B'];
