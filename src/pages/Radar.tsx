@@ -1,16 +1,14 @@
 import { useState, useEffect } from 'react';
 import { 
-  Radar as RadarIcon, Plus, ExternalLink, CheckCircle2, Weight, Tag, Trash2, Edit2, Loader2 
+  Radar as RadarIcon, Plus, Loader2 
 } from "lucide-react";
 import { supabase } from "../lib/supabase";
 import { useAuth } from "../contexts/AuthContext";
 import { useUI } from "../contexts/UIContext";
 import { ItemModal } from "../components/ItemModal";
-import { BrandBadge } from "../components/BrandBadge";
 import { BRANDS_DIRECTORY as MOCK_BRANDS } from "../lib/brands";
 import type { Item } from "../types";
 
-import { getCategoryIcon } from "../lib/icons";
 import { ItemCard } from "../components/ItemCard";
 import { EmptyState } from "../components/EmptyState";
 import { motion, AnimatePresence } from "framer-motion";
