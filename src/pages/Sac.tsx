@@ -2,7 +2,7 @@ import { useState, useMemo, useEffect } from "react";
 import { PieChart, Pie, Cell, ResponsiveContainer, Sector } from "recharts";
 import { 
   Plus, Trash2, Weight, Shirt, Droplet, Archive, Backpack, X, 
-  Search, Filter, SlidersHorizontal, ArrowDownAZ, Tag, ChevronLeft, Minus, Share2, PackagePlus, Users, Globe
+  Search, Filter, SlidersHorizontal, ArrowDownAZ, Tag, ChevronLeft, Minus, Share2, PackagePlus, Users, Globe, LogOut
 } from "lucide-react";
 import type { Item, PackItem, Category, PackConfig, BagCollaborator } from "../types";
 import { getCategoryIcon } from "../lib/icons";
@@ -449,6 +449,22 @@ export default function Sac() {
     });
   }
 
+  const handleLeaveBag = async () => {
+    if (!activeConfig || !user) return;
+    
+    confirm({
+      title: "Quitter la configuration ?",
+      message: "Es-tu sûr de vouloir quitter cette configuration de sac partagée ?",
+      confirmText: "Quitter",
+      onConfirm: async () => {
+        setConfigs(configs.filter(c => c.id !== activeConfig.id));
+        setSelectedConfigId(null);
+        await supabase.from('bag_collaborators').delete().eq('bag_id', activeConfig.id).eq('user_id', user.id);
+        toast({ message: "Vous avez quitté la configuration." });
+      }
+    });
+  }
+
   const handleSharePack = async () => {
     if (!activeConfig) return;
     
@@ -550,13 +566,23 @@ export default function Sac() {
               <Share2 size={16} />
               <span className="hidden sm:inline">Inviter</span>
             </button>
-            <button
-              onClick={handleTrashBag}
-              className="text-[var(--text-muted)] hover:text-red-500 hover:bg-red-500/10 transition-colors p-2 sm:p-3 rounded-full cursor-pointer ml-2"
-              title="Supprimer la configuration"
-            >
-              <Trash2 size={20} className="sm:w-6 sm:h-6" />
-            </button>
+            {activeConfig.user_id === user?.id ? (
+              <button
+                onClick={handleTrashBag}
+                className="text-[var(--text-muted)] hover:text-red-500 hover:bg-red-500/10 transition-colors p-2 sm:p-3 rounded-full cursor-pointer ml-2"
+                title="Supprimer la configuration"
+              >
+                <Trash2 size={20} className="sm:w-6 sm:h-6" />
+              </button>
+            ) : (
+              <button
+                onClick={handleLeaveBag}
+                className="text-[var(--text-muted)] hover:text-orange-500 hover:bg-orange-500/10 transition-colors p-2 sm:p-3 rounded-full cursor-pointer ml-2"
+                title="Quitter la configuration"
+              >
+                <LogOut size={20} className="sm:w-6 sm:h-6" />
+              </button>
+            )}
           </div>
         </div>
 
@@ -575,7 +601,7 @@ export default function Sac() {
               setConfigs(newConfigs);
             }}
             onBlur={(e) => handleNameUpdate(e.target.value)}
-            className="text-3xl md:text-5xl font-bold tracking-tight text-[var(--text-color)] bg-transparent border-none outline-none focus:ring-0 p-0 hover:bg-[var(--surface-color)]/50 focus:bg-[var(--surface-color)] rounded-xl transition-colors min-w-0 flex-grow"
+            className="text-3xl md:text-5xl font-bold tracking-tight text-[var(--text-color)] bg-transparent border-none outline-none focus:ring-0 p-0 hover:bg-[var(--surface-color)]/50 focus:bg-[var(--surface-color)] rounded-xl transition-colors min-w-0 flex-grow leading-none h-[1em]"
           />
         </div>
       </div>
@@ -760,7 +786,7 @@ export default function Sac() {
                             {getCategoryIcon(cat)}
                           </div>
                           <h3 className="font-bold text-sm tracking-wide text-[var(--text-color)]">{cat}</h3>
-                          <div className="ml-auto flex items-center justify-center bg-[var(--surface-color)] border border-[var(--border-color)] text-[var(--text-color)] font-semibold text-xs rounded-full px-2.5 py-0.5 shadow-sm">
+                          <div className="ml-auto flex items-center justify-center text-[var(--text-color)] font-semibold text-xs py-0.5">
                             {formatWeight(catWeight)}
                           </div>
                         </div>
@@ -786,11 +812,13 @@ export default function Sac() {
                                       </div>
                                     )}
                                   </div>
-                                  <div className="min-w-0 pr-4 flex flex-col justify-center">
+                                  <div className="flex flex-col min-w-0">
                                     <p className="font-bold text-base truncate text-[var(--text-color)]" title={pi.item.name}>{pi.item.name}</p>
-                                    <p className="text-[10px] font-bold text-[var(--text-muted)] tracking-wider">
-                                      Propriétaire : {getUserDisplayName(pi.item.user_id)}
-                                    </p>
+                                    {collaborators.length > 1 && (
+                                      <p className="text-[10px] font-bold text-[var(--text-muted)] tracking-wider">
+                                        Propriétaire : {getUserDisplayName(pi.item.user_id)}
+                                      </p>
+                                    )}
                                   </div>
                                 </div>
 
