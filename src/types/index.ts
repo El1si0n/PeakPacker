@@ -32,12 +32,22 @@ export interface PackItem {
   isConsumable: boolean;
   isWorn: boolean;
   quantity: number;
+  assigned_to?: string; // UUID of the user carrying it
+}
+
+export interface BagCollaborator {
+  user_id: string;
+  role: string;
+  email?: string;
+  user?: { email?: string; id?: string }; // In case we join auth.users in the future
 }
 
 export interface PackConfig {
   id: string;
   name: string;
   icon?: string;
+  user_id?: string; // the owner
   items: PackItem[];
+  collaborators?: BagCollaborator[];
 }
 

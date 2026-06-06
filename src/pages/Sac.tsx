@@ -2,9 +2,9 @@ import { useState, useMemo, useEffect } from "react";
 import { PieChart, Pie, Cell, ResponsiveContainer, Sector } from "recharts";
 import { 
   Plus, Trash2, Weight, Shirt, Droplet, Archive, Backpack, X, 
-  Search, Filter, SlidersHorizontal, ArrowDownAZ, Tag, ChevronLeft, Minus, Share2, PackagePlus
+  Search, Filter, SlidersHorizontal, ArrowDownAZ, Tag, ChevronLeft, Minus, Share2, PackagePlus, Users
 } from "lucide-react";
-import type { Item, PackItem, Category, PackConfig } from "../types";
+import type { Item, PackItem, Category, PackConfig, BagCollaborator } from "../types";
 import { getCategoryIcon } from "../lib/icons";
 
 import { supabase } from "../lib/supabase";
@@ -86,13 +86,45 @@ export default function Sac() {
   const [modalIsFiltersOpen, setModalIsFiltersOpen] = useState(false);
   const [modalSortBy, setModalSortBy] = useState<"name" | "weight-asc" | "weight-desc" | "price-asc" | "price-desc">("name");
 
+  // Multi-joueurs
+  const [selectedTabUserId, setSelectedTabUserId] = useState<string>("global"); 
+
   const formatWeight = (g: number) => {
     if (g >= 1000) return (g / 1000).toFixed(2) + " kg";
     return g + " g";
   }
 
-  // Fetch Data
-  
+  // Join logic
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const joinId = params.get('join');
+    if (joinId && user) {
+      joinBag(joinId);
+    }
+  }, [user]);
+
+  const joinBag = async (bagId: string) => {
+    if (!user) return;
+    const { error } = await supabase.from('bag_collaborators').insert({
+      bag_id: bagId,
+      user_id: user.id,
+      email: user.email || 'Anonyme',
+      role: 'member'
+    });
+    
+    // Nettoyer l'URL
+    const newUrl = window.location.pathname;
+    window.history.replaceState({}, document.title, newUrl);
+    
+    if (error && error.code !== '23505') { // 23505 = unique_violation, means already in
+      toast({ message: "Erreur lors de l'accès au sac partagé.", type: "error" });
+    } else {
+      if (!error) toast({ message: "Vous avez rejoint la configuration d'expédition !", type: "success" });
+      fetchData();
+      setSelectedConfigId(bagId);
+    }
+  };
+
   useEffect(() => {
     if (user) {
       fetchData();
@@ -102,15 +134,14 @@ export default function Sac() {
   const fetchData = async () => {
     if (!user) return;
     
-    // Fetch Inventory
-    const { data: invData } = await supabase.from('inventory').select('*').eq('user_id', user.id);
+    // Fetch Inventory. Grâce à nos nouvelles RLS, on récupère notre inventaire ET celui des amis avec qui on partage un sac !
+    const { data: invData } = await supabase.from('inventory').select('*');
     setInventoryItems((invData as Item[]) || []);
 
-    // Fetch Bags
+    // Fetch Bags (seuls ceux que je possède ou collabore remonteront grâce au RLS)
     const { data: bagsData } = await supabase
       .from('bags')
-      .select('*, bag_items(*, item:inventory(*))')
-      .eq('user_id', user.id)
+      .select('*, bag_items(*, item:inventory(*)), bag_collaborators(user_id, role, email)')
       .order('created_at', { ascending: false });
     
     if (bagsData) {
@@ -118,12 +149,15 @@ export default function Sac() {
         id: b.id,
         name: b.name,
         icon: b.icon,
+        user_id: b.user_id,
+        collaborators: b.bag_collaborators || [],
         items: b.bag_items.map((bi: any) => ({
           id: bi.id,
           item: bi.item as Item,
           isConsumable: bi.is_consumable,
           isWorn: bi.is_worn,
-          quantity: bi.quantity
+          quantity: bi.quantity,
+          assigned_to: bi.assigned_to
         }))
       }));
       setConfigs(parsedConfigs);
@@ -132,9 +166,9 @@ export default function Sac() {
 
   const handleCreateBag = async () => {
     if (!user) return;
-    const { data } = await supabase.from('bags').insert({ name: "Nouveau Sac", user_id: user.id }).select().single();
+    const { data } = await supabase.from('bags').insert({ name: "Nouvelle Expédition", user_id: user.id }).select().single();
     if (data) {
-      const newConf: PackConfig = { id: data.id, name: data.name, items: [] };
+      const newConf: PackConfig = { id: data.id, name: data.name, items: [], user_id: user.id, collaborators: [] };
       setConfigs([newConf, ...configs]);
       setSelectedConfigId(data.id);
     }
@@ -142,7 +176,46 @@ export default function Sac() {
 
   const activeConfigIndex = configs.findIndex(c => c.id === selectedConfigId);
   const activeConfig = activeConfigIndex !== -1 ? configs[activeConfigIndex] : null;
-  const packItems = activeConfig ? activeConfig.items : [];
+  
+  // Real-time subscription pour la configuration active
+  useEffect(() => {
+    if (!activeConfig || !user) return;
+    
+    const channel = supabase
+      .channel(`bag_${activeConfig.id}`)
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'bag_items', filter: `bag_id=eq.${activeConfig.id}` }, () => {
+         fetchData(); // Rafraichissement agressif pour simplifier la jointure
+      })
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'bags', filter: `id=eq.${activeConfig.id}` }, () => {
+         fetchData();
+      })
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    }
+  }, [activeConfig?.id, user]);
+
+  // Liste combinée du créateur et des collaborateurs
+  const collaborators = useMemo(() => {
+    if (!activeConfig) return [];
+    const list: BagCollaborator[] = [];
+    if (activeConfig.user_id) list.push({ user_id: activeConfig.user_id, role: 'owner', email: 'Créateur' });
+    activeConfig.collaborators?.forEach(c => {
+      if (c.user_id !== activeConfig.user_id) list.push(c);
+    });
+    return list;
+  }, [activeConfig]);
+
+  // Éléments du sac affichés en fonction de l'onglet (Vue globale ou Sac personnel)
+  const packItems = useMemo(() => {
+    if (!activeConfig) return [];
+    if (selectedTabUserId === "global") return activeConfig.items;
+    return activeConfig.items.filter(i => {
+       const ownerId = i.assigned_to || activeConfig.user_id;
+       return ownerId === selectedTabUserId;
+    });
+  }, [activeConfig, selectedTabUserId]);
 
   const metrics = useMemo(() => {
     let base = 0;
@@ -183,6 +256,12 @@ export default function Sac() {
       .sort((a,b) => b.value - a.value);
   }, [packItems]);
 
+  const getOwnerName = (userId?: string) => {
+    if (!userId || userId === user?.id) return "Moi";
+    const c = collaborators.find(col => col.user_id === userId);
+    return c?.email ? c.email.split('@')[0] : "Collaborateur";
+  }
+
   // MENU VIEW
   if (!selectedConfigId || !activeConfig) {
     return (
@@ -196,7 +275,7 @@ export default function Sac() {
             </h1>
           </div>
           <p className="text-[var(--text-muted)] text-lg">
-            Gérez le contenu de vos sacs et optimisez votre poids d'expédition.
+            Gérez le contenu de vos sacs, en solo ou en équipe.
           </p>
         </div>
 
@@ -210,16 +289,21 @@ export default function Sac() {
               <Plus size={24} className="sm:hidden" />
               <Plus size={32} className="hidden sm:block" />
             </div>
-            <h3 className="font-bold text-lg sm:text-xl">Créer un nouveau sac</h3>
+            <h3 className="font-bold text-lg sm:text-xl">Créer une expédition</h3>
           </div>
 
           {/* Cards */}
           {configs.map(config => {
             const configWeight = config.items.reduce((sum, pi) => sum + (!pi.isWorn ? (pi.item?.weight || 0) * pi.quantity : 0), 0);
+            const collabCount = (config.collaborators?.length || 0) + 1;
+            
             return (
               <div 
                 key={config.id}
-                onClick={() => setSelectedConfigId(config.id)}
+                onClick={() => {
+                  setSelectedConfigId(config.id);
+                  setSelectedTabUserId("global");
+                }}
                 className="bg-[var(--surface-color)] border border-[var(--border-color)] rounded-3xl p-5 sm:p-6 flex flex-col cursor-pointer hover:border-[var(--color-primary)] hover:shadow-xl hover:shadow-[var(--color-primary)]/10 transition-all h-auto min-h-[140px] sm:h-[240px] group relative overflow-hidden"
               >
                 <div className="absolute top-0 right-0 p-4 sm:p-6 opacity-10 transform translate-x-2 -translate-y-2 sm:translate-x-4 sm:-translate-y-4 group-hover:scale-110 group-hover:opacity-20 transition-all">
@@ -228,10 +312,20 @@ export default function Sac() {
                     return <CardIcon className="w-16 h-16 sm:w-[100px] sm:h-[100px]" />;
                   })()}
                 </div>
+                
                 <h3 className="font-bold text-xl sm:text-2xl mb-1 z-10 text-[var(--text-color)] truncate pr-8 pt-1">{config.name}</h3>
-                <p className="text-[var(--text-muted)] text-sm sm:text-base font-medium z-10 mb-auto">{config.items.length} équipement{config.items.length > 1 && 's'}</p>
+                
+                <div className="flex items-center gap-3 z-10 mb-auto mt-2">
+                  <p className="text-[var(--text-muted)] text-sm sm:text-base font-medium">{config.items.length} équipement{config.items.length > 1 && 's'}</p>
+                  {collabCount > 1 && (
+                    <div className="flex items-center gap-1.5 text-xs font-bold text-white bg-[var(--color-primary)] px-2 py-0.5 rounded-full shadow-sm">
+                      <Users size={12} /> {collabCount}
+                    </div>
+                  )}
+                </div>
+
                 <div className="mt-4 sm:mt-8 flex items-end justify-between z-10 w-full border-t border-[var(--border-color)] pt-3 sm:pt-4">
-                  <span className="text-[var(--text-muted)] font-bold text-xs sm:text-sm uppercase">Poids embarqué</span>
+                  <span className="text-[var(--text-muted)] font-bold text-xs sm:text-sm uppercase">Poids global</span>
                   <span className="text-2xl sm:text-3xl font-black text-[var(--color-primary)]">{formatWeight(configWeight)}</span>
                 </div>
               </div>
@@ -243,7 +337,6 @@ export default function Sac() {
   }
 
   // ACTIVE CONFIG VIEW LAYER
-
 
   const handleNameUpdate = async (newName: string) => {
     if (!activeConfig) return;
@@ -270,7 +363,7 @@ export default function Sac() {
   const modalFilteredItems = inventoryItems.filter(item => {
     const matchesSearch = item.name.toLowerCase().includes(modalSearch.toLowerCase());
     const matchesCategory = modalCategory === "Tous" || item.category === modalCategory;
-    const isAlreadyInPack = packItems.some(pi => pi.item.id === item.id);
+    const isAlreadyInPack = activeConfig.items.some(pi => pi.item.id === item.id);
     
     return matchesSearch && matchesCategory && !isAlreadyInPack;
   }).sort((a, b) => {
@@ -282,7 +375,7 @@ export default function Sac() {
   });
 
   const toggleModifier = (id: string, field: "isConsumable" | "isWorn") => {
-    const newItems = packItems.map(pi => pi.id === id ? { ...pi, [field]: !pi[field] } : pi);
+    const newItems = activeConfig.items.map(pi => pi.id === id ? { ...pi, [field]: !pi[field] } : pi);
     const newConfigs = [...configs];
     newConfigs[activeConfigIndex] = { ...newConfigs[activeConfigIndex], items: newItems };
     setConfigs(newConfigs);
@@ -291,11 +384,11 @@ export default function Sac() {
   }
 
   const updateQuantity = (id: string, delta: number) => {
-    const pi = packItems.find(p => p.id === id);
+    const pi = activeConfig.items.find(p => p.id === id);
     if (!pi) return;
     const newQ = Math.max(1, pi.quantity + delta);
     
-    const newItems = packItems.map(p => p.id === id ? { ...p, quantity: newQ } : p);
+    const newItems = activeConfig.items.map(p => p.id === id ? { ...p, quantity: newQ } : p);
     const newConfigs = [...configs];
     newConfigs[activeConfigIndex] = { ...newConfigs[activeConfigIndex], items: newItems };
     setConfigs(newConfigs);
@@ -303,8 +396,17 @@ export default function Sac() {
     updateBagItemDb(id, { quantity: newQ });
   }
 
+  const updateAssignedTo = (id: string, newUserId: string) => {
+    const newItems = activeConfig.items.map(p => p.id === id ? { ...p, assigned_to: newUserId } : p);
+    const newConfigs = [...configs];
+    newConfigs[activeConfigIndex] = { ...newConfigs[activeConfigIndex], items: newItems };
+    setConfigs(newConfigs);
+
+    updateBagItemDb(id, { assigned_to: newUserId });
+  }
+
   const removeItem = async (id: string) => {
-    const newItems = packItems.filter(p => p.id !== id);
+    const newItems = activeConfig.items.filter(p => p.id !== id);
     const newConfigs = [...configs];
     newConfigs[activeConfigIndex] = { ...newConfigs[activeConfigIndex], items: newItems };
     setConfigs(newConfigs);
@@ -330,30 +432,16 @@ export default function Sac() {
 
   const handleSharePack = async () => {
     if (!activeConfig) return;
-    const shareId = crypto.randomUUID();
     
-    // We stringify and upload the snapshot of the pack to the public table
-    const { error } = await supabase.from('public_shared_packs').insert({
-      id: shareId,
-      name: activeConfig.name,
-      user_id: user?.id,
-      data: activeConfig.items
-    });
-
-    if (error) {
-      console.error(error);
-      toast({ message: "Erreur lors de la création du lien de partage.", type: "error" });
-    } else {
-      const shareUrl = `${window.location.origin}/share/${shareId}`;
-      navigator.clipboard.writeText(shareUrl);
-      toast({ message: "Lien public généré et copié dans ton presse-papier !", type: "success", duration: 5000 });
-    }
+    const shareUrl = `${window.location.origin}/sac?join=${activeConfig.id}`;
+    navigator.clipboard.writeText(shareUrl);
+    toast({ message: "Lien d'invitation copié dans ton presse-papier ! Partage-le avec tes amis.", type: "success", duration: 5000 });
   };
 
   const addItemToPack = async (item: Item) => {
-    if (!activeConfig) return;
+    if (!activeConfig || !user) return;
     // Si l'équipement est déjà dans le sac, on incrémente juste la quantité
-    const existing = packItems.find(pi => pi.item.id === item.id);
+    const existing = activeConfig.items.find(pi => pi.item.id === item.id);
     if (existing) {
       updateQuantity(existing.id, 1);
       return;
@@ -361,13 +449,17 @@ export default function Sac() {
 
     const isConsumable = item.category === "Nourriture" || (item.category === "Cuisine" && item.name.includes("gaz"));
     const isWorn = item.category === "Vêtements" && item.name.includes("Chaussures");
+    
+    // Assigner l'objet : si on est dans l'onglet global, on l'assigne à nous même. Sinon on l'assigne au membre de l'onglet actif.
+    const targetUserId = selectedTabUserId === "global" ? user.id : selectedTabUserId;
 
     const { data } = await supabase.from('bag_items').insert({
       bag_id: activeConfig.id,
       inventory_id: item.id,
       is_consumable: isConsumable,
       is_worn: isWorn,
-      quantity: 1
+      quantity: 1,
+      assigned_to: targetUserId
     }).select('*, item:inventory(*)').single();
 
     if (data) {
@@ -376,10 +468,11 @@ export default function Sac() {
         item: data.item as Item,
         isConsumable: data.is_consumable,
         isWorn: data.is_worn,
-        quantity: data.quantity
+        quantity: data.quantity,
+        assigned_to: data.assigned_to
       };
       
-      const newItems = [...packItems, newItem];
+      const newItems = [...activeConfig.items, newItem];
       const newConfigs = [...configs];
       newConfigs[activeConfigIndex] = { ...newConfigs[activeConfigIndex], items: newItems };
       setConfigs(newConfigs);
@@ -403,14 +496,15 @@ export default function Sac() {
           <div className="flex items-center gap-1">
             <button
               onClick={handleSharePack}
-              className="text-[var(--text-muted)] hover:text-[var(--color-primary)] hover:bg-[var(--color-primary)]/10 transition-colors p-2 sm:p-3 rounded-full cursor-pointer"
-              title="Générer un lien public"
+              className="text-white bg-[var(--color-primary)] hover:brightness-110 transition-colors px-4 py-2 sm:px-5 sm:py-2.5 rounded-full cursor-pointer font-bold flex items-center gap-2 text-sm shadow-md"
+              title="Inviter des amis"
             >
-              <Share2 size={20} className="sm:w-6 sm:h-6" />
+              <Share2 size={16} />
+              <span className="hidden sm:inline">Inviter</span>
             </button>
             <button
               onClick={handleTrashBag}
-              className="text-[var(--text-muted)] hover:text-red-500 hover:bg-red-500/10 transition-colors p-2 sm:p-3 rounded-full cursor-pointer"
+              className="text-[var(--text-muted)] hover:text-red-500 hover:bg-red-500/10 transition-colors p-2 sm:p-3 rounded-full cursor-pointer ml-2"
               title="Supprimer la configuration"
             >
               <Trash2 size={20} className="sm:w-6 sm:h-6" />
@@ -437,6 +531,35 @@ export default function Sac() {
           />
         </div>
       </div>
+      
+      {/* ONGLETS MUTLI-JOUEURS */}
+      {collaborators.length > 1 && (
+        <div className="flex flex-wrap gap-2 mb-8 animate-in fade-in">
+          <button 
+            onClick={() => setSelectedTabUserId("global")}
+            className={`px-4 py-2.5 rounded-full font-bold text-sm transition-all shadow-sm flex items-center gap-2 ${selectedTabUserId === "global" ? "bg-[var(--text-color)] text-[var(--bg-color)] scale-105" : "bg-[var(--surface-color)] border border-[var(--border-color)] text-[var(--text-muted)] hover:border-[var(--text-color)]"}`}
+          >
+            <Users size={16} />
+            Pot Commun ({collaborators.length})
+          </button>
+          {collaborators.map(c => {
+              const isMe = c.user_id === user?.id;
+              const label = isMe ? "Moi" : (c.email ? c.email.split('@')[0] : "Collaborateur");
+              return (
+                <button 
+                  key={c.user_id}
+                  onClick={() => setSelectedTabUserId(c.user_id)}
+                  className={`px-4 py-2.5 rounded-full font-bold text-sm transition-all flex items-center gap-2 shadow-sm ${selectedTabUserId === c.user_id ? "bg-[var(--color-primary)] text-white scale-105" : "bg-[var(--surface-color)] border border-[var(--border-color)] text-[var(--text-muted)] hover:border-[var(--color-primary)]"}`}
+                >
+                  <div className="w-5 h-5 rounded-full bg-white/25 flex items-center justify-center text-[10px] text-current font-black uppercase">
+                    {label.substring(0, 2)}
+                  </div>
+                  Sac de {label}
+                </button>
+              )
+          })}
+        </div>
+      )}
 
       <div className="flex flex-col lg:flex-row gap-8">
         
@@ -466,7 +589,9 @@ export default function Sac() {
 
             <div className="flex items-center justify-between pt-2">
                <div className="flex flex-col">
-                <span className="text-[var(--color-primary)] text-sm font-bold uppercase tracking-wider mb-1">TOTAL SUR LE DOS</span>
+                <span className="text-[var(--color-primary)] text-sm font-bold uppercase tracking-wider mb-1">
+                   {selectedTabUserId === "global" ? "TOTAL GROUPE" : "TOTAL SUR LE DOS"}
+                </span>
                 <span className="text-4xl font-black text-[var(--color-primary)]">{formatWeight(metrics.totalOnBack)}</span>
               </div>
               <div className="w-12 h-12 rounded-full bg-[var(--color-primary)]/20 flex items-center justify-center shadow-lg shadow-[var(--color-primary)]/20">
@@ -555,7 +680,7 @@ export default function Sac() {
           <div className="bg-[var(--surface-color)] border border-[var(--border-color)] rounded-[24px] shadow-sm flex flex-col">
             
             <div className="p-4 sm:p-5 border-b border-[var(--border-color)] flex flex-wrap gap-4 items-center justify-between bg-[var(--surface-color)] rounded-t-[24px]">
-              <h2 className="text-xl font-bold">Contenu du sac ({packItems.length})</h2>
+              <h2 className="text-xl font-bold">Contenu ({packItems.length})</h2>
               <button 
                 onClick={() => setShowAddModal(true)}
                 className="flex items-center justify-center gap-2 bg-[var(--color-primary)] text-white px-5 py-2.5 rounded-full font-medium hover:opacity-90 active:scale-95 transition-all text-sm shadow-md shadow-[var(--color-primary)]/20 w-full sm:w-auto"
@@ -569,7 +694,7 @@ export default function Sac() {
               <div className="w-full">
                 {packItems.length === 0 && (
                   <div className="text-center py-20 text-[var(--text-muted)]">
-                    <p>Votre sac est complètement vide.</p>
+                    <p>Cette section est vide.</p>
                   </div>
                 )}
 
@@ -616,6 +741,9 @@ export default function Sac() {
                                   </div>
                                   <div className="min-w-0 pr-4 flex flex-col justify-center">
                                     <p className="font-bold text-base truncate text-[var(--text-color)]" title={pi.item.name}>{pi.item.name}</p>
+                                    <p className="text-[10px] font-bold text-[var(--text-muted)] tracking-wider">
+                                      Propriétaire : {getOwnerName(pi.item.user_id)}
+                                    </p>
                                   </div>
                                 </div>
 
@@ -624,6 +752,23 @@ export default function Sac() {
                                   
                                   {/* Right side modifiers */}
                                   <div className="flex items-center gap-2 mr-auto lg:mr-4">
+                                    
+                                    {/* Assignation Select - only shown in global view if >1 member */}
+                                    {collaborators.length > 1 && selectedTabUserId === "global" && (
+                                      <select 
+                                        value={pi.assigned_to || activeConfig.user_id} 
+                                        onChange={(e) => updateAssignedTo(pi.id, e.target.value)}
+                                        className="bg-[var(--surface-color)] border border-[var(--border-color)] text-[var(--color-primary)] font-bold text-xs rounded-lg px-2 py-1.5 outline-none cursor-pointer max-w-[120px] truncate"
+                                        title="Qui le porte ?"
+                                      >
+                                        {collaborators.map(c => {
+                                           const isMe = c.user_id === user?.id;
+                                           const label = isMe ? "Moi" : (c.email ? c.email.split('@')[0] : "Collaborateur");
+                                           return <option key={c.user_id} value={c.user_id}>{label}</option>
+                                        })}
+                                      </select>
+                                    )}
+
                                     {showConsumable && (
                                       <button 
                                         onClick={() => toggleModifier(pi.id, "isConsumable")}
@@ -695,13 +840,12 @@ export default function Sac() {
       {/* MODAL POUR AJOUTER */}
       {showAddModal && (
         <div className="fixed inset-0 z-[100] bg-black/60 backdrop-blur-sm flex justify-center items-center p-4">
-           {/* ... Same modal ... I'll restore it directly from original code structure here */}
           <div className="bg-[var(--bg-color)] border border-[var(--border-color)] w-full max-w-2xl rounded-3xl shadow-2xl flex flex-col overflow-hidden max-h-[90vh] sm:max-h-[85vh] zoom-in-95 animate-in">
             {/* Modal Header */}
             <div className="p-5 border-b border-[var(--border-color)] flex items-center justify-between bg-[var(--surface-color)]">
               <h2 className="text-2xl font-bold text-[var(--text-color)] tracking-tight flex items-center gap-3">
                 <PackagePlus size={28} className="text-[var(--color-primary)] hidden sm:block" />
-                Ajouter depuis l'inventaire
+                Ajouter depuis le pot commun
               </h2>
               <button 
                 onClick={() => setShowAddModal(false)}
@@ -815,7 +959,10 @@ export default function Sac() {
                       </div>
                       <div className="flex flex-col min-w-0">
                         <span className="font-bold text-[var(--text-color)] text-sm truncate">{item.name}</span>
-                        <span className="text-xs text-[var(--text-muted)] font-medium truncate">{item.category} • {formatWeight(item.weight)}</span>
+                        <span className="text-xs text-[var(--text-muted)] font-medium truncate">
+                          {item.category} • {formatWeight(item.weight)}
+                          {collaborators.length > 1 && ` • Propriétaire : ${getOwnerName(item.user_id)}`}
+                        </span>
                       </div>
                     </div>
 
