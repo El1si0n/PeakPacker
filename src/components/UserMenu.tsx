@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { LogOut, Moon, Sun, Settings, Box, Backpack, Map, X, Lock, Mail } from "lucide-react";
+import { LogOut, Moon, Sun, Settings, Box, Backpack, Map, X, Lock, Mail, MessageSquare, Coffee } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useAuth } from "../contexts/AuthContext";
 import { useUI } from "../contexts/UIContext";
@@ -243,6 +243,42 @@ export function UserMenu({ isOpen, onClose }: { isOpen: boolean, onClose: () => 
                       </div>
                     </div>
                   </div>
+                </div>
+              </div>
+
+              {/* Communauté & Soutien */}
+              <div className="flex flex-col gap-3">
+                <h3 className="text-xs font-bold uppercase tracking-wider text-[var(--text-muted)]">Soutien & Retours</h3>
+                <div className="bg-[var(--surface-color)] border border-[var(--border-color)] p-4 rounded-2xl flex flex-col gap-3">
+                  <a 
+                    href="https://docs.google.com/forms/d/e/1FAIpQLScXQKzuu2GPzf78v1-65a_znAyA4dzbiUadjHXjEFzU3wSYjg/viewform?usp=publish-editor" 
+                    target="_blank" 
+                    rel="noopener noreferrer"
+                    className="flex items-center gap-3 bg-[var(--bg-color)] border border-[var(--border-color)] p-3 rounded-xl hover:border-[var(--color-primary)] transition-colors group"
+                  >
+                    <div className="p-2 bg-[var(--surface-color)] rounded-lg group-hover:bg-[var(--color-primary)]/10 transition-colors">
+                      <MessageSquare size={18} className="text-[var(--text-color)] group-hover:text-[var(--color-primary)] transition-colors" />
+                    </div>
+                    <div className="flex flex-col">
+                      <span className="text-sm font-bold text-[var(--text-color)]">Avis & Bugs</span>
+                      <span className="text-xs text-[var(--text-muted)]">Aide à améliorer PeakPacker</span>
+                    </div>
+                  </a>
+
+                  <a 
+                    href="https://ko-fi.com/peakpacker" 
+                    target="_blank" 
+                    rel="noopener noreferrer"
+                    className="flex items-center gap-3 bg-[var(--bg-color)] border border-[var(--border-color)] p-3 rounded-xl hover:border-orange-500 transition-colors group"
+                  >
+                    <div className="p-2 bg-[var(--surface-color)] rounded-lg group-hover:bg-orange-500/10 transition-colors">
+                      <Coffee size={18} className="text-[var(--text-color)] group-hover:text-orange-500 transition-colors" />
+                    </div>
+                    <div className="flex flex-col">
+                      <span className="text-sm font-bold text-[var(--text-color)]">Soutenir PeakPacker ☕</span>
+                      <span className="text-xs text-[var(--text-muted)]">Faire un petit don pour l'hébergement</span>
+                    </div>
+                  </a>
                 </div>
               </div>
 
