@@ -482,8 +482,8 @@ export default function Sac() {
       return;
     }
 
-    const isConsumable = item.category === "Nourriture" || (item.category === "Cuisine" && item.name.includes("gaz"));
-    const isWorn = item.category === "Vêtements" && item.name.includes("Chaussures");
+    const isConsumable = false;
+    const isWorn = false;
     
     // Assigner l'objet : si on est dans l'onglet global, on l'assigne à nous même. Sinon on l'assigne au membre de l'onglet actif.
     const targetUserId = selectedTabUserId === "global" ? user.id : selectedTabUserId;
