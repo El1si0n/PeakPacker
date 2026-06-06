@@ -512,7 +512,7 @@ export default function Sac() {
           <div className="flex items-center gap-2 sm:gap-3">
             <button
               onClick={() => {
-                const shareUrl = `${window.location.origin}/shared/${activeConfig.id}`;
+                const shareUrl = `${window.location.origin}/share/${activeConfig.id}`;
                 navigator.clipboard.writeText(shareUrl);
                 toast({ message: "Lien public copié ! Idéal pour partager en lecture seule.", type: "success" });
               }}
