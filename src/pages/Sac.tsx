@@ -511,10 +511,23 @@ export default function Sac() {
           
           <div className="flex items-center gap-2 sm:gap-3">
             <button
-              onClick={() => {
-                const shareUrl = `${window.location.origin}/share/${activeConfig.id}`;
-                navigator.clipboard.writeText(shareUrl);
-                toast({ message: "Lien public copié ! Idéal pour partager en lecture seule.", type: "success" });
+              onClick={async () => {
+                const shareId = crypto.randomUUID();
+                const { error } = await supabase.from('public_shared_packs').insert({
+                  id: shareId,
+                  name: activeConfig.name,
+                  user_id: user?.id,
+                  data: activeConfig.items
+                });
+
+                if (error) {
+                  console.error(error);
+                  toast({ message: "Erreur lors de la création du lien de partage.", type: "error" });
+                } else {
+                  const shareUrl = `${window.location.origin}/share/${shareId}`;
+                  navigator.clipboard.writeText(shareUrl);
+                  toast({ message: "Lien public généré et copié ! Idéal pour partager en lecture seule.", type: "success" });
+                }
               }}
               className="text-[var(--text-muted)] bg-[var(--surface-color)] border border-[var(--border-color)] hover:border-[var(--color-primary)] hover:text-[var(--color-primary)] transition-colors px-4 py-2 sm:px-5 sm:py-2.5 rounded-full cursor-pointer font-bold flex items-center gap-2 text-sm shadow-sm"
               title="Publier la configuration (Lecture seule)"
