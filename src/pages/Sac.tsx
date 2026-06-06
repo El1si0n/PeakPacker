@@ -269,7 +269,7 @@ export default function Sac() {
 
   const getUserDisplayName = (userId?: string, fallbackEmail?: string) => {
     if (!userId) return "Utilisateur";
-    if (userId === user?.id && user?.email) return user.email.split('@')[0];
+    if (userId === user?.id) return "Moi";
     if (fallbackEmail) return fallbackEmail.split('@')[0];
     const c = collaborators.find(col => col.user_id === userId);
     if (c?.email) return c.email.split('@')[0];
@@ -377,6 +377,9 @@ export default function Sac() {
   };
 
   const modalFilteredItems = inventoryItems.filter(item => {
+    const validUserIds = [activeConfig.user_id, ...collaborators.map(c => c.user_id)];
+    if (!validUserIds.includes(item.user_id)) return false;
+
     const matchesSearch = item.name.toLowerCase().includes(modalSearch.toLowerCase());
     const matchesCategory = modalCategory === "Tous" || item.category === modalCategory;
     const isAlreadyInPack = activeConfig.items.some(pi => pi.item.id === item.id);
@@ -513,11 +516,15 @@ export default function Sac() {
             <button
               onClick={async () => {
                 const shareId = crypto.randomUUID();
+                const myItems = activeConfig.items.filter(pi => {
+                  const assignedTo = pi.assigned_to || activeConfig.user_id;
+                  return assignedTo === user?.id;
+                });
                 const { error } = await supabase.from('public_shared_packs').insert({
                   id: shareId,
                   name: activeConfig.name,
                   user_id: user?.id,
-                  data: activeConfig.items
+                  data: myItems
                 });
 
                 if (error) {
@@ -592,9 +599,9 @@ export default function Sac() {
                   className={`px-4 py-2.5 rounded-full font-bold text-sm transition-all flex items-center gap-2 shadow-sm ${selectedTabUserId === c.user_id ? "bg-[var(--color-primary)] text-white scale-105" : "bg-[var(--surface-color)] border border-[var(--border-color)] text-[var(--text-muted)] hover:border-[var(--color-primary)]"}`}
                 >
                   <div className={`w-5 h-5 rounded-full ${selectedTabUserId === c.user_id ? 'bg-white/25' : 'bg-[var(--text-color)]/10'} flex items-center justify-center text-[10px] text-current font-black uppercase`}>
-                    {label.substring(0, 2)}
+                    {label === "Moi" ? "M" : label.substring(0, 2)}
                   </div>
-                  Sac de {label}
+                  {label === "Moi" ? "Mon Sac" : `Sac de ${label}`}
                 </button>
               )
           })}
