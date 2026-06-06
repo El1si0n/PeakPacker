@@ -2,7 +2,7 @@ import { useState, useMemo, useEffect } from "react";
 import { PieChart, Pie, Cell, ResponsiveContainer, Sector } from "recharts";
 import { 
   Plus, Trash2, Weight, Shirt, Droplet, Archive, Backpack, X, 
-  Search, Filter, SlidersHorizontal, ArrowDownAZ, Tag, ChevronLeft, Minus, Share2, PackagePlus, Users
+  Search, Filter, SlidersHorizontal, ArrowDownAZ, Tag, ChevronLeft, Minus, Share2, PackagePlus, Users, Globe
 } from "lucide-react";
 import type { Item, PackItem, Category, PackConfig, BagCollaborator } from "../types";
 import { getCategoryIcon } from "../lib/icons";
@@ -105,24 +105,33 @@ export default function Sac() {
 
   const joinBag = async (bagId: string) => {
     if (!user) return;
-    const { error } = await supabase.from('bag_collaborators').insert({
-      bag_id: bagId,
-      user_id: user.id,
-      email: user.email || 'Anonyme',
-      role: 'member'
-    });
+    
+    const { data: existing } = await supabase.from('bag_collaborators')
+      .select('*')
+      .eq('bag_id', bagId)
+      .eq('user_id', user.id)
+      .single();
+
+    if (!existing) {
+      const { error } = await supabase.from('bag_collaborators').insert({
+        bag_id: bagId,
+        user_id: user.id,
+        email: user.email || 'Anonyme',
+        role: 'member'
+      });
+      if (error) {
+        toast({ message: "Erreur lors de l'accès au sac partagé.", type: "error" });
+      } else {
+        toast({ message: "Vous avez rejoint la configuration d'expédition !", type: "success" });
+      }
+    }
     
     // Nettoyer l'URL
     const newUrl = window.location.pathname;
     window.history.replaceState({}, document.title, newUrl);
     
-    if (error && error.code !== '23505') { // 23505 = unique_violation, means already in
-      toast({ message: "Erreur lors de l'accès au sac partagé.", type: "error" });
-    } else {
-      if (!error) toast({ message: "Vous avez rejoint la configuration d'expédition !", type: "success" });
-      fetchData();
-      setSelectedConfigId(bagId);
-    }
+    fetchData();
+    setSelectedConfigId(bagId);
   };
 
   useEffect(() => {
@@ -168,8 +177,8 @@ export default function Sac() {
     if (!user) return;
     const { data } = await supabase.from('bags').insert({ name: "Nouvelle Expédition", user_id: user.id }).select().single();
     if (data) {
-      const newConf: PackConfig = { id: data.id, name: data.name, items: [], user_id: user.id, collaborators: [] };
-      setConfigs([newConf, ...configs]);
+      await supabase.from('bag_collaborators').insert({ bag_id: data.id, user_id: user.id, email: user.email || '', role: 'owner' });
+      fetchData();
       setSelectedConfigId(data.id);
     }
   };
@@ -199,13 +208,15 @@ export default function Sac() {
   // Liste combinée du créateur et des collaborateurs
   const collaborators = useMemo(() => {
     if (!activeConfig) return [];
-    const list: BagCollaborator[] = [];
-    if (activeConfig.user_id) list.push({ user_id: activeConfig.user_id, role: 'owner', email: 'Créateur' });
+    const map = new Map<string, BagCollaborator>();
+    if (activeConfig.user_id) {
+       map.set(activeConfig.user_id, { user_id: activeConfig.user_id, role: 'owner', email: user?.id === activeConfig.user_id ? (user.email || undefined) : undefined } as BagCollaborator);
+    }
     activeConfig.collaborators?.forEach(c => {
-      if (c.user_id !== activeConfig.user_id) list.push(c);
+      map.set(c.user_id, c);
     });
-    return list;
-  }, [activeConfig]);
+    return Array.from(map.values());
+  }, [activeConfig, user]);
 
   // Éléments du sac affichés en fonction de l'onglet (Vue globale ou Sac personnel)
   const packItems = useMemo(() => {
@@ -256,10 +267,13 @@ export default function Sac() {
       .sort((a,b) => b.value - a.value);
   }, [packItems]);
 
-  const getOwnerName = (userId?: string) => {
-    if (!userId || userId === user?.id) return "Moi";
+  const getUserDisplayName = (userId?: string, fallbackEmail?: string) => {
+    if (!userId) return "Utilisateur";
+    if (userId === user?.id && user?.email) return user.email.split('@')[0];
+    if (fallbackEmail) return fallbackEmail.split('@')[0];
     const c = collaborators.find(col => col.user_id === userId);
-    return c?.email ? c.email.split('@')[0] : "Collaborateur";
+    if (c?.email) return c.email.split('@')[0];
+    return "Utilisateur";
   }
 
   // MENU VIEW
@@ -295,7 +309,9 @@ export default function Sac() {
           {/* Cards */}
           {configs.map(config => {
             const configWeight = config.items.reduce((sum, pi) => sum + (!pi.isWorn ? (pi.item?.weight || 0) * pi.quantity : 0), 0);
-            const collabCount = (config.collaborators?.length || 0) + 1;
+            const uniqueUsers = new Set(config.collaborators?.map(c => c.user_id) || []);
+            if (config.user_id) uniqueUsers.add(config.user_id);
+            const collabCount = uniqueUsers.size;
             
             return (
               <div 
@@ -308,7 +324,7 @@ export default function Sac() {
               >
                 <div className="absolute top-0 right-0 p-4 sm:p-6 opacity-10 transform translate-x-2 -translate-y-2 sm:translate-x-4 sm:-translate-y-4 group-hover:scale-110 group-hover:opacity-20 transition-all">
                   {(() => {
-                    const CardIcon = getBagIcon(config.icon);
+                    const CardIcon = getBagIcon(config.icon || 'Backpack');
                     return <CardIcon className="w-16 h-16 sm:w-[100px] sm:h-[100px]" />;
                   })()}
                 </div>
@@ -493,11 +509,23 @@ export default function Sac() {
             Retour
           </button>
           
-          <div className="flex items-center gap-1">
+          <div className="flex items-center gap-2 sm:gap-3">
+            <button
+              onClick={() => {
+                const shareUrl = `${window.location.origin}/shared/${activeConfig.id}`;
+                navigator.clipboard.writeText(shareUrl);
+                toast({ message: "Lien public copié ! Idéal pour partager en lecture seule.", type: "success" });
+              }}
+              className="text-[var(--text-muted)] bg-[var(--surface-color)] border border-[var(--border-color)] hover:border-[var(--color-primary)] hover:text-[var(--color-primary)] transition-colors px-4 py-2 sm:px-5 sm:py-2.5 rounded-full cursor-pointer font-bold flex items-center gap-2 text-sm shadow-sm"
+              title="Publier la configuration (Lecture seule)"
+            >
+              <Globe size={16} />
+              <span className="hidden sm:inline">Publier</span>
+            </button>
             <button
               onClick={handleSharePack}
               className="text-white bg-[var(--color-primary)] hover:brightness-110 transition-colors px-4 py-2 sm:px-5 sm:py-2.5 rounded-full cursor-pointer font-bold flex items-center gap-2 text-sm shadow-md"
-              title="Inviter des amis"
+              title="Inviter des collaborateurs"
             >
               <Share2 size={16} />
               <span className="hidden sm:inline">Inviter</span>
@@ -543,15 +571,14 @@ export default function Sac() {
             Pot Commun ({collaborators.length})
           </button>
           {collaborators.map(c => {
-              const isMe = c.user_id === user?.id;
-              const label = isMe ? "Moi" : (c.email ? c.email.split('@')[0] : "Collaborateur");
+              const label = getUserDisplayName(c.user_id, c.email);
               return (
                 <button 
                   key={c.user_id}
                   onClick={() => setSelectedTabUserId(c.user_id)}
                   className={`px-4 py-2.5 rounded-full font-bold text-sm transition-all flex items-center gap-2 shadow-sm ${selectedTabUserId === c.user_id ? "bg-[var(--color-primary)] text-white scale-105" : "bg-[var(--surface-color)] border border-[var(--border-color)] text-[var(--text-muted)] hover:border-[var(--color-primary)]"}`}
                 >
-                  <div className="w-5 h-5 rounded-full bg-white/25 flex items-center justify-center text-[10px] text-current font-black uppercase">
+                  <div className={`w-5 h-5 rounded-full ${selectedTabUserId === c.user_id ? 'bg-white/25' : 'bg-[var(--text-color)]/10'} flex items-center justify-center text-[10px] text-current font-black uppercase`}>
                     {label.substring(0, 2)}
                   </div>
                   Sac de {label}
@@ -742,7 +769,7 @@ export default function Sac() {
                                   <div className="min-w-0 pr-4 flex flex-col justify-center">
                                     <p className="font-bold text-base truncate text-[var(--text-color)]" title={pi.item.name}>{pi.item.name}</p>
                                     <p className="text-[10px] font-bold text-[var(--text-muted)] tracking-wider">
-                                      Propriétaire : {getOwnerName(pi.item.user_id)}
+                                      Propriétaire : {getUserDisplayName(pi.item.user_id)}
                                     </p>
                                   </div>
                                 </div>
@@ -752,23 +779,6 @@ export default function Sac() {
                                   
                                   {/* Right side modifiers */}
                                   <div className="flex items-center gap-2 mr-auto lg:mr-4">
-                                    
-                                    {/* Assignation Select - only shown in global view if >1 member */}
-                                    {collaborators.length > 1 && selectedTabUserId === "global" && (
-                                      <select 
-                                        value={pi.assigned_to || activeConfig.user_id} 
-                                        onChange={(e) => updateAssignedTo(pi.id, e.target.value)}
-                                        className="bg-[var(--surface-color)] border border-[var(--border-color)] text-[var(--color-primary)] font-bold text-xs rounded-lg px-2 py-1.5 outline-none cursor-pointer max-w-[120px] truncate"
-                                        title="Qui le porte ?"
-                                      >
-                                        {collaborators.map(c => {
-                                           const isMe = c.user_id === user?.id;
-                                           const label = isMe ? "Moi" : (c.email ? c.email.split('@')[0] : "Collaborateur");
-                                           return <option key={c.user_id} value={c.user_id}>{label}</option>
-                                        })}
-                                      </select>
-                                    )}
-
                                     {showConsumable && (
                                       <button 
                                         onClick={() => toggleModifier(pi.id, "isConsumable")}
@@ -791,6 +801,21 @@ export default function Sac() {
                                   </div>
 
                                   <div className="flex items-center gap-2 lg:gap-3">
+                                    
+                                    {/* Assignation Select */}
+                                    {collaborators.length > 1 && selectedTabUserId === "global" && (
+                                      <select 
+                                        value={pi.assigned_to || activeConfig.user_id} 
+                                        onChange={(e) => updateAssignedTo(pi.id, e.target.value)}
+                                        className="bg-[var(--surface-color)] border border-[var(--border-color)] text-[var(--color-primary)] font-bold text-xs rounded-full px-3 py-1.5 outline-none cursor-pointer max-w-[120px] truncate"
+                                        title="Qui le porte ?"
+                                      >
+                                        {collaborators.map(c => (
+                                           <option key={c.user_id} value={c.user_id}>{getUserDisplayName(c.user_id, c.email)}</option>
+                                        ))}
+                                      </select>
+                                    )}
+
                                     <div className={`font-semibold text-sm w-12 text-right ${pi.isWorn ? 'text-[var(--text-muted)] line-through' : 'text-[var(--text-color)]'}`}>
                                       {formatWeight(totalItemWeight)}
                                     </div>
@@ -961,7 +986,7 @@ export default function Sac() {
                         <span className="font-bold text-[var(--text-color)] text-sm truncate">{item.name}</span>
                         <span className="text-xs text-[var(--text-muted)] font-medium truncate">
                           {item.category} • {formatWeight(item.weight)}
-                          {collaborators.length > 1 && ` • Propriétaire : ${getOwnerName(item.user_id)}`}
+                          {collaborators.length > 1 && ` • Propriétaire : ${getUserDisplayName(item.user_id)}`}
                         </span>
                       </div>
                     </div>
